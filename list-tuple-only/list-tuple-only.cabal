@@ -1,0 +1,43 @@
+cabal-version: 1.12
+
+-- This file has been generated from package.yaml by hpack version 0.31.1.
+--
+-- see: https://github.com/sol/hpack
+--
+-- hash: 09dba8ea44d505848a52f4ef2c9ef6b50fcc59bad3a1a5e685dc969a8aec081f
+
+name:           list-tuple-only
+version:        0.1.0.0
+synopsis:       List-like operations for Only
+description:    Please see the README on GitHub at <https://github.com/kakkun61/tuple#readme>
+category:       Data
+homepage:       https://github.com/kakkun61/tuple#readme
+bug-reports:    https://github.com/kakkun61/tuple/issues
+author:         Kazuki Okamoto
+maintainer:     kazuki.okamoto@kakkun61.com
+copyright:      2019 Kazuki Okamoto
+license:        AllRightsReserved
+license-file:   LICENSE
+build-type:     Simple
+extra-source-files:
+    README.md
+    ChangeLog.md
+
+source-repository head
+  type: git
+  location: https://github.com/kakkun61/tuple
+
+library
+  exposed-modules:
+      Data.Tuple.List.Only
+  other-modules:
+      Paths_list_tuple_only
+  hs-source-dirs:
+      src
+  ghc-options: -Wall -Wcompat -Wincomplete-uni-patterns -Wincomplete-record-updates -Wmonomorphism-restriction -Wmissing-exported-signatures -Wmissing-export-lists -Wmissing-home-modules -Wmissing-import-lists -Widentities -Wredundant-constraints -Wpartial-fields -Wno-name-shadowing -Wno-unticked-promoted-constructors
+  build-depends:
+      Only
+    , base
+    , list-tuple
+    , single-tuple-only
+  default-language: Haskell2010

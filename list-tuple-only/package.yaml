@@ -1,0 +1,43 @@
+name: list-tuple-only
+version: 0.1.0.0
+github: "kakkun61/tuple"
+license: AllRightsReserved
+author: "Kazuki Okamoto"
+maintainer: "kazuki.okamoto@kakkun61.com"
+copyright: "2019 Kazuki Okamoto"
+
+extra-source-files:
+- README.md
+- ChangeLog.md
+
+synopsis: List-like operations for Only
+category: Data
+
+
+description: Please see the README on GitHub at <https://github.com/kakkun61/tuple#readme>
+
+dependencies:
+- base
+
+ghc-options:
+- -Wall
+- -Wcompat
+- -Wincomplete-uni-patterns
+- -Wincomplete-record-updates
+- -Wmonomorphism-restriction
+- -Wmissing-exported-signatures
+- -Wmissing-export-lists
+- -Wmissing-home-modules
+- -Wmissing-import-lists
+- -Widentities
+- -Wredundant-constraints
+- -Wpartial-fields
+- -Wno-name-shadowing
+- -Wno-unticked-promoted-constructors
+
+library:
+  source-dirs: src
+  dependencies:
+  - list-tuple
+  - single-tuple-only
+  - Only

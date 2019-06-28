@@ -1,0 +1,41 @@
+name: single-tuple-identity
+version: 0.1.0.0
+github: "kakkun61/tuple"
+license: AllRightsReserved
+author: "Kazuki Okamoto"
+maintainer: "kazuki.okamoto@kakkun61.com"
+copyright: "2019 Kazuki Okamoto"
+
+extra-source-files:
+- README.md
+- ChangeLog.md
+
+synopsis: an Identity instance for a class for single tuple implementations
+category: Data
+
+
+description: Please see the README on GitHub at <https://github.com/kakkun61/tuple#readme>
+
+dependencies:
+- base
+
+ghc-options:
+- -Wall
+- -Wcompat
+- -Wincomplete-uni-patterns
+- -Wincomplete-record-updates
+- -Wmonomorphism-restriction
+- -Wmissing-exported-signatures
+- -Wmissing-export-lists
+- -Wmissing-home-modules
+- -Wmissing-import-lists
+- -Widentities
+- -Wredundant-constraints
+- -Wpartial-fields
+- -Wno-name-shadowing
+- -Wno-unticked-promoted-constructors
+
+library:
+  source-dirs: src
+  dependencies:
+  - single-tuple-class

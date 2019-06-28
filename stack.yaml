@@ -1,0 +1,11 @@
+resolver: lts-13.26
+
+packages:
+- homotuple
+- homotuple-only
+- list-tuple
+- list-tuple-only
+- single-tuple-class
+- single-tuple-only
+- single-tuple-onetuple
+- single-tuple-identity

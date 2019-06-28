@@ -1,0 +1,42 @@
+cabal-version: 1.12
+
+-- This file has been generated from package.yaml by hpack version 0.31.1.
+--
+-- see: https://github.com/sol/hpack
+--
+-- hash: 5c01194225118394559c0f15d35e09298bc02b6d02795adaf7ef20ed5630a307
+
+name:           homotuple-only
+version:        0.1.0.0
+synopsis:       an Only instance for homotuple
+description:    Please see the README on GitHub at <https://github.com/kakkun61/tuple#readme>
+category:       Data
+homepage:       https://github.com/kakkun61/tuple#readme
+bug-reports:    https://github.com/kakkun61/tuple/issues
+author:         Kazuki Okamoto
+maintainer:     kazuki.okamoto@kakkun61.com
+copyright:      2019 Kazuki Okamoto
+license:        AllRightsReserved
+license-file:   LICENSE
+build-type:     Simple
+extra-source-files:
+    README.md
+    ChangeLog.md
+
+source-repository head
+  type: git
+  location: https://github.com/kakkun61/tuple
+
+library
+  exposed-modules:
+      Data.Tuple.Homotuple.Only
+  other-modules:
+      Paths_homotuple_only
+  hs-source-dirs:
+      src
+  ghc-options: -Wall -Wcompat -Wincomplete-uni-patterns -Wincomplete-record-updates -Wmonomorphism-restriction -Wmissing-exported-signatures -Wmissing-export-lists -Wmissing-home-modules -Wmissing-import-lists -Widentities -Wredundant-constraints -Wpartial-fields -Wno-name-shadowing -Wno-unticked-promoted-constructors
+  build-depends:
+      Only
+    , base
+    , homotuple
+  default-language: Haskell2010
