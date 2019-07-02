@@ -20,8 +20,6 @@ module Data.Tuple.List
   , last1
   , null1
   , length1
-  , HasAt (..)
-  , at1
     -- Patterns
   , pattern Null
   , pattern Cons
@@ -29,15 +27,15 @@ module Data.Tuple.List
   ) where
 
 
-import           Prelude                 (Bool (False, True), Eq ((==)), Int,
-                                          Integral, error, fromInteger, ($))
+import           Prelude           (Bool (False, True), Eq ((==)), Int,
+                                    Integral, error, fromInteger, ($))
 
-import           Data.Kind               (Type)
-import           Data.Proxy              (Proxy (Proxy))
-import           Data.Tuple.Single.Class (Single (unwrap, wrap))
-import           GHC.Stack               (HasCallStack)
-import           GHC.TypeLits            (ErrorMessage ((:<>:), ShowType, Text),
-                                          KnownNat, Nat, TypeError, natVal)
+import           Data.Kind         (Type)
+import           Data.Proxy        (Proxy (Proxy))
+import           Data.Tuple.Single (Single (unwrap, wrap))
+import           GHC.Stack         (HasCallStack)
+import           GHC.TypeLits      (ErrorMessage ((:<>:), ShowType, Text),
+                                    KnownNat, Nat, TypeError, natVal)
 
 class Construct a u where
   type Cons a u :: Type
@@ -93,10 +91,6 @@ class HasInit t s where
   default init :: (Destruct t, s ~ Init t) => t -> s
   init = init'
 
-class HasAt t (n :: Nat) where
-  type Item t n :: Type
-  at :: t -> proxy n -> Item t n
-
 -- 0
 
 instance Destruct () where
@@ -136,9 +130,6 @@ null1 _ = False
 length1 :: Integral n => t a -> n
 length1 _ = 1
 
-at1 :: Single t => t a -> proxy (n :: Nat) -> a
-at1 t _ = unwrap t
-
 -- 2
 
 instance Destruct (a, b) where
@@ -163,14 +154,6 @@ instance Single t => HasTail (a, b) (t b) where
 
 instance Single t => HasInit (a, b) (t a) where
   init (a, _) = wrap a
-
-instance HasAt (a, b) 0 where
-  type Item (a, b) 0 = a
-  at (a, _) _ = a
-
-instance HasAt (a, b) 1 where
-  type Item (a, b) 1 = b
-  at (_, b) _ = b
 
 -- 3
 

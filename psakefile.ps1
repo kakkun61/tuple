@@ -1,5 +1,5 @@
 function Get-SubPsakefile {
-    Get-ChildItem -Filter 'psakefile.ps1' homotuple, homotuple-only, list-tuple, list-tuple-only, single-tuple-class, single-tuple-identity, single-tuple-onetuple, single-tuple-only
+    Get-ChildItem -Filter 'psakefile.ps1' homotuple, homotuple-only, list-tuple, single-tuple
 }
 
 function Invoke-SubPsake ($Task) {

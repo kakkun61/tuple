@@ -8,13 +8,11 @@
 
 module Data.Tuple.List.Only () where
 
-import           Prelude                ()
+import           Prelude         ()
 
-import           Data.Tuple.List        (Construct (Cons, cons'), Destruct (Head, Init, Last, Length, Tail, head, last, length, null, uncons'),
-                                         HasAt (Item, at), at1, head1, last1,
-                                         length1, null1)
-import           Data.Tuple.Only        (Only (Only))
-import           Data.Tuple.Single.Only ()
+import           Data.Tuple.List (Construct (Cons, cons'), Destruct (Head, Init, Last, Length, Tail, head, last, length, null, uncons'),
+                                  head1, last1, length1, null1)
+import           Data.Tuple.Only (Only (Only))
 
 instance Construct a () where
   type Cons a () = Only a
@@ -31,7 +29,3 @@ instance Destruct (Only a) where
   null = null1
   type Length (Only a) = 1
   length = length1
-
-instance HasAt (Only a) 0 where
-  type Item (Only a) 0 = a
-  at = at1

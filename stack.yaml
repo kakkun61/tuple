@@ -4,8 +4,4 @@ packages:
 - homotuple
 - homotuple-only
 - list-tuple
-- list-tuple-only
-- single-tuple-class
-- single-tuple-only
-- single-tuple-onetuple
-- single-tuple-identity
+- single-tuple

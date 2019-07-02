@@ -38,4 +38,6 @@ ghc-options:
 library:
   source-dirs: src
   dependencies:
-  - single-tuple-class
+  - single-tuple
+  - OneTuple
+  - Only
