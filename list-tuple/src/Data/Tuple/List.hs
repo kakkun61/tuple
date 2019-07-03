@@ -10,6 +10,8 @@
 {-# LANGUAGE UndecidableInstances  #-}
 {-# LANGUAGE ViewPatterns          #-}
 
+{-# OPTIONS_GHC -Wno-redundant-constraints#-}
+
 module Data.Tuple.List
   ( Construct (..)
   , Destruct (..)
@@ -112,10 +114,10 @@ instance Single t => HasCons (t a) a () where
   cons a _ = wrap a
   uncons t = (unwrap t, ())
 
-instance HasTail (t a) () where
+instance Single t => HasTail (t a) () where
   tail _ = ()
 
-instance HasInit (t a) () where
+instance Single t => HasInit (t a) () where
   init _ = ()
 
 head1 :: Single t => t a -> a
