@@ -1,5 +1,5 @@
 Properties {
-    $subpackages = "homotuple", "homotuple-only", "list-tuple", "single-tuple"
+    $subpackages = "homotuple", "list-tuple", "single-tuple"
     $excludedPaths = "*\.stack-work\*"
     $crlfFiles = "*.ps1", "TAGS"
 }
