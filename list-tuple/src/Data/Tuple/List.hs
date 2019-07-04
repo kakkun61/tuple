@@ -28,7 +28,6 @@ module Data.Tuple.List
   , pattern Cons'
   ) where
 
-
 import           Prelude           (Bool (False, True), Eq ((==)), Int,
                                     Integral, error, fromInteger, ($))
 
