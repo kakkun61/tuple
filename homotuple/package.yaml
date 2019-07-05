@@ -34,8 +34,10 @@ ghc-options:
 - -Wpartial-fields
 - -Wno-name-shadowing
 
-default-extensions:
-- NoStarIsType
+when:
+- condition: impl(ghc >= 8.6.1)
+  default-extensions:
+  - NoStarIsType
 
 library:
   source-dirs: src
