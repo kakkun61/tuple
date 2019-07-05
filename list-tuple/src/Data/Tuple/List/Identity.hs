@@ -1,7 +1,6 @@
 {-# LANGUAGE DataKinds             #-}
 {-# LANGUAGE FlexibleInstances     #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
-{-# LANGUAGE ScopedTypeVariables   #-}
 {-# LANGUAGE TypeFamilies          #-}
 
 {-# OPTIONS_GHC -Wno-orphans #-}
@@ -10,23 +9,44 @@ module Data.Tuple.List.Identity () where
 
 import           Prelude               ()
 
-import           Data.Functor.Identity (Identity (Identity))
-import           Data.Tuple.List (Cons, Head, Init, Last, Length, Tail, HeadTailUnique (cons'), TupleUnique (head, last, length, null, uncons'),
-                                  head1, last1, length1, null1)
+import           Data.Functor.Identity (Identity)
+import           Data.Tuple.List       (Cons, HasCons, HasHead, HasInit,
+                                        HasLast, HasLength, HasTail, HasUncons,
+                                        Head, Init, Last, Length, Tail)
+
+-- 1
 
 type instance Cons a () = Identity a
 type instance Head (Identity a) = a
-type instance Last (Identity a) = a
 type instance Tail (Identity a) = ()
 type instance Init (Identity a) = ()
+type instance Last (Identity a) = a
 type instance Length (Identity a) = 1
 
-instance HeadTailUnique a () where
-  cons' a _ = Identity a
+instance HasHead (Identity a)
 
-instance TupleUnique (Identity a) where
-  head = head1
-  last = last1
-  uncons' (Identity a) = (a, ())
-  null = null1
-  length = length1
+instance HasTail (Identity a)
+
+instance HasInit (Identity a)
+
+instance HasLast (Identity a)
+
+instance HasCons a ()
+
+instance HasUncons (Identity a)
+
+instance HasLength (Identity a)
+
+-- 2
+
+type instance Cons a (Identity b) = (a, b)
+type instance Tail (a, b) = Identity b
+type instance Init (a, b) = Identity a
+
+instance HasTail (a, b)
+
+instance HasInit (a, b)
+
+instance HasCons a (Identity b)
+
+instance HasUncons (a, b)
