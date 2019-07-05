@@ -10,22 +10,23 @@ module Data.Tuple.List.OneTuple () where
 
 import           Prelude             ()
 
-import           Data.Tuple.List     (Construct (Cons, cons'), Destruct (Head, Init, Last, Length, Tail, head, last, length, null, uncons'),
-                                      head1, last1, length1, null1)
+import           Data.Tuple.List (Cons, Head, Init, Last, Length, Tail, HeadTailUnique (cons'), TupleUnique (head, last, length, null, uncons'),
+                                  head1, last1, length1, null1)
 import           Data.Tuple.OneTuple (OneTuple (OneTuple))
 
-instance Construct a () where
-  type Cons a () = OneTuple a
+type instance Cons a () = OneTuple a
+type instance Head (OneTuple a) = a
+type instance Last (OneTuple a) = a
+type instance Tail (OneTuple a) = ()
+type instance Init (OneTuple a) = ()
+type instance Length (OneTuple a) = 1
+
+instance HeadTailUnique a () where
   cons' a _ = OneTuple a
 
-instance Destruct (OneTuple a) where
-  type Head (OneTuple a) = a
+instance TupleUnique (OneTuple a) where
   head = head1
-  type Last (OneTuple a) = a
   last = last1
-  type Tail (OneTuple a) = ()
-  type Init (OneTuple a) = ()
   uncons' (OneTuple a) = (a, ())
   null = null1
-  type Length (OneTuple a) = 1
   length = length1

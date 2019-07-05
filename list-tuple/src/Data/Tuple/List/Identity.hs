@@ -11,21 +11,22 @@ module Data.Tuple.List.Identity () where
 import           Prelude               ()
 
 import           Data.Functor.Identity (Identity (Identity))
-import           Data.Tuple.List       (Construct (Cons, cons'), Destruct (Head, Init, Last, Length, Tail, head, last, length, null, uncons'),
-                                        head1, last1, length1, null1)
+import           Data.Tuple.List (Cons, Head, Init, Last, Length, Tail, HeadTailUnique (cons'), TupleUnique (head, last, length, null, uncons'),
+                                  head1, last1, length1, null1)
 
-instance Construct a () where
-  type Cons a () = Identity a
+type instance Cons a () = Identity a
+type instance Head (Identity a) = a
+type instance Last (Identity a) = a
+type instance Tail (Identity a) = ()
+type instance Init (Identity a) = ()
+type instance Length (Identity a) = 1
+
+instance HeadTailUnique a () where
   cons' a _ = Identity a
 
-instance Destruct (Identity a) where
-  type Head (Identity a) = a
+instance TupleUnique (Identity a) where
   head = head1
-  type Last (Identity a) = a
   last = last1
-  type Tail (Identity a) = ()
-  type Init (Identity a) = ()
   uncons' (Identity a) = (a, ())
   null = null1
-  type Length (Identity a) = 1
   length = length1

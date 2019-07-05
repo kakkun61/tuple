@@ -13,11 +13,16 @@
 {-# OPTIONS_GHC -Wno-redundant-constraints#-}
 
 module Data.Tuple.List
-  ( Construct (..)
-  , Destruct (..)
-  , HasCons (..)
-  , HasTail (..)
-  , HasInit (..)
+  ( Cons
+  , Head
+  , Last
+  , Tail
+  , Init
+  , Length
+  , HeadTailUnique (..)
+  , TupleUnique (..)
+  , TupleTailUnique (..)
+  , TupleInitUnique (..)
   , head1
   , last1
   , null1
@@ -35,39 +40,27 @@ import           Data.Kind         (Type)
 import           Data.Proxy        (Proxy (Proxy))
 import           Data.Tuple.Single (Single (unwrap, wrap))
 import           GHC.Stack         (HasCallStack)
-import           GHC.TypeLits      (ErrorMessage ((:<>:), ShowType, Text),
+import           GHC.TypeLits      (ErrorMessage (Text),
                                     KnownNat, Nat, TypeError, natVal)
 
-class Construct a u where
-  type Cons a u :: Type
-  cons' :: a -> u -> Cons a u
-  default cons' :: HasCons (Cons a u) a u => a -> u -> Cons a u
-  cons' = cons
+type family Cons a u :: Type
+type family Head t :: Type
+type family Last t :: Type
+type family Tail t :: Type
+type family Init t :: Type
+type family Length t :: Nat
 
-class HasCons t a u where
-  cons :: a -> u -> t
-  default cons :: (Construct a u, t ~ Cons a u) => a -> u -> t
-  cons = cons'
-
-  uncons :: t -> (a, u)
-  default uncons :: (Destruct t, a ~ Head t, u ~ Tail t) => t -> (a, u)
-  uncons t = (head t, tail' t)
-
-class Destruct t where
-  type Head t :: Type
+class TupleUnique t where
   head :: t -> Head t
 
-  type Last t :: Type
   last :: t -> Last t
 
-  type Tail t :: Type
   tail' :: t -> Tail t
-  default tail' :: HasTail t (Tail t) => t -> Tail t
+  default tail' :: TupleTailUnique t (Tail t) => t -> Tail t
   tail' = tail
 
-  type Init t :: Type
   init' :: t -> Init t
-  default init' :: HasInit t (Init t) => t -> Init t
+  default init' :: TupleInitUnique t (Init t) => t -> Init t
   init' = init
 
   uncons' :: t -> (Head t, Tail t)
@@ -76,47 +69,57 @@ class Destruct t where
   null :: t -> Bool
   null t = length t == (0 :: Int)
 
-  type Length t :: Nat
-
   length :: Integral n => t -> n
   default length :: (Integral n, KnownNat (Length t)) => t -> n
   length _ = fromInteger $ natVal (Proxy :: Proxy (Length t))
 
-class HasTail t u where
+class HeadTailUnique a u where
+  cons' :: a -> u -> Cons a u
+  default cons' :: (TupleTailUnique (Cons a u) u, a ~ Head (Cons a u)) => a -> u -> Cons a u
+  cons' = cons
+
+class TupleTailUnique t u where
+  cons :: Head t -> u -> t
+  default cons :: (HeadTailUnique (Head t) u, t ~ Cons (Head t) u) => Head t -> u -> t
+  cons = cons'
+
+  uncons :: a ~ Head t => t -> (a, u)
+  default uncons :: (TupleUnique t, a ~ Head t, u ~ Tail t) => t -> (a, u)
+  uncons t = (head t, tail' t)
+
   tail :: t -> u
-  default tail :: (Destruct t, u ~ Tail t) => t -> u
+  default tail :: (TupleUnique t, u ~ Tail t) => t -> u
   tail = tail'
 
-class HasInit t s where
+class TupleInitUnique t s where
   init :: t -> s
-  default init :: (Destruct t, s ~ Init t) => t -> s
+  default init :: (TupleUnique t, s ~ Init t) => t -> s
   init = init'
 
 -- 0
 
-instance Destruct () where
-  type Head () = TypeError (ShowType () :<>: Text " does not have more than 0 elements")
+type instance Head () = TypeError (Text "() does not have more than 0 elements")
+type instance Last () = TypeError (Text "() does not have more than 0 elements")
+type instance Tail () = TypeError (Text "() does not have more than 0 elements")
+type instance Init () = TypeError (Text "() does not have more than 0 elements")
+type instance Length () = 0
+
+instance TupleUnique () where
   head = neverReachHere
-  type Last () = TypeError (ShowType () :<>: Text " does not have more than 0 elements")
   last = neverReachHere
-  type Tail () = TypeError (ShowType () :<>: Text " does not have more than 0 elements")
   tail' = neverReachHere
-  type Init () = TypeError (ShowType () :<>: Text " does not have more than 0 elements")
   init' = neverReachHere
   null _ = True
-  type Length () = 0
   length _ = 0
 
 -- 1
 
-instance Single t => HasCons (t a) a () where
+instance (Single t, a ~ Head (t a)) => TupleTailUnique (t a) () where
   cons a _ = wrap a
   uncons t = (unwrap t, ())
-
-instance Single t => HasTail (t a) () where
   tail _ = ()
 
-instance Single t => HasInit (t a) () where
+instance (Single t, a ~ Head (t a)) => TupleInitUnique (t a) () where
   init _ = ()
 
 head1 :: Single t => t a -> a
@@ -133,67 +136,66 @@ length1 _ = 1
 
 -- 2
 
-instance Destruct (a, b) where
-  type Head (a, b) = a
+type instance Head (a, b) = a
+type instance Last (a, b) = b
+-- type instance Tail (a, b) = TypeError (Text "singleton tuple is not determined uniquely")
+-- type instance Init (a, b) = TypeError (Text "singleton tuple is not determined uniquely")
+type instance Length (a, b) = 2
+
+instance TupleUnique (a, b) where
   head (a, _) = a
-  type Last (a, b) = b
   last (_, b) = b
-  type Tail (a, b) = TypeError (Text "singleton tuple is not determined uniquely")
-  tail' = neverReachHere
-  type Init (a, b) = TypeError (Text "singleton tuple is not determined uniquely")
+  tail' = neverReachHere -- TODO No!
   init' = neverReachHere
+  uncons' = neverReachHere
   null _ = False
-  type Length (a, b) = 2
   length _ = 2
 
-instance Single t => HasCons (a, b) a (t b) where
+instance Single t => TupleTailUnique (a, b) (t b) where
   cons a tb = (a, unwrap tb)
   uncons (a, b) = (a, wrap b)
-
-instance Single t => HasTail (a, b) (t b) where
   tail (_, b) = wrap b
 
-instance Single t => HasInit (a, b) (t a) where
+instance Single t => TupleInitUnique (a, b) (t a) where
   init (a, _) = wrap a
 
 -- 3
 
-instance Construct a (b, c) where
-  type Cons a (b, c) = (a, b, c)
+type instance Cons a (b, c) = (a, b, c)
+type instance Head (a, b, c) = a
+type instance Last (a, b, c) = c
+type instance Tail (a, b, c) = (b, c)
+type instance Init (a, b, c) = (a, b)
+type instance Length (a, b, c) = 3
+
+instance HeadTailUnique a (b, c) where
   cons' a (b, c) = (a, b, c)
 
-instance Destruct (a, b, c) where
-  type Head (a, b, c) = a
+instance TupleUnique (a, b, c) where
   head (a, _, _) = a
-  type Last (a, b, c) = c
   last (_, _, c) = c
-  type Tail (a, b, c) = (b, c)
   tail' (_, b, c) = (b, c)
-  type Init (a, b, c) = (a, b)
   init' (a, b, _) = (a, b)
   uncons' (a, b, c) = (a, (b, c))
   null _ = False
-  type Length (a, b, c) = 3
   length _ = 3
   -- type Reverse (a, b, c) = (c, b, a)
   -- reverse (a, b, c) = (c, b, a)
 
-instance HasCons (a, b, c) a (b, c)
+instance TupleTailUnique (a, b, c) (b, c)
 
-instance HasTail (a, b, c) (b, c)
-
-instance HasInit (a, b, c) (a, b)
+instance TupleInitUnique (a, b, c) (a, b)
 
 -- patterns
 
-pattern Null :: Destruct t => t
+pattern Null :: TupleUnique t => t
 pattern Null <- (null -> True)
 
-pattern Cons :: HasCons t a u => a -> u -> t
+pattern Cons :: (TupleTailUnique t u, a ~ Head t) => a -> u -> t
 pattern Cons a t <- (uncons -> (a, t)) where
   Cons a t = cons a t
 
-pattern Cons' :: (Construct a u, Destruct t, t ~ Cons a u, a ~ Head t, u ~ Tail t) => a -> u -> t
+pattern Cons' :: (HeadTailUnique a u, TupleUnique t, t ~ Cons a u, a ~ Head t, u ~ Tail t) => a -> u -> t
 pattern Cons' a t <- (uncons' -> (a, t)) where
   Cons' a t = cons' a t
 
