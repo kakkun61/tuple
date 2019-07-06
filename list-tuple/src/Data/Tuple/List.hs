@@ -74,9 +74,9 @@ import           GHC.TypeLits          (ErrorMessage (Text), KnownNat, Nat,
 
 type family Cons a u :: Type
 type family Head t :: Type
-type family Last t :: Type
 type family Tail t :: Type
 type family Init t :: Type
+type family Last t :: Type
 type family Length t :: Nat
 
 class HasHead' t a where
@@ -146,9 +146,9 @@ pattern Cons a u <- (uncons -> (a, u)) where
 -- 0
 
 type instance Head () = TypeError (Text "empty tuple")
-type instance Last () = TypeError (Text "empty tuple")
 type instance Tail () = TypeError (Text "empty tuple")
 type instance Init () = TypeError (Text "empty tuple")
+type instance Last () = TypeError (Text "empty tuple")
 type instance Length () = 0
 
 instance HasLength ()
@@ -219,9 +219,9 @@ instance HasLength (a, b)
 
 type instance Cons a (b, c) = (a, b, c)
 type instance Head (a, b, c) = a
-type instance Last (a, b, c) = c
 type instance Tail (a, b, c) = (b, c)
 type instance Init (a, b, c) = (a, b)
+type instance Last (a, b, c) = c
 type instance Length (a, b, c) = 3
 
 instance HasHead' (a, b, c) a where
@@ -302,3 +302,487 @@ instance HasLength (a, b, c, d)
 
 {-# COMPLETE Cons' :: (,,,) #-}
 {-# COMPLETE Cons :: (,,,) #-}
+
+-- 5
+
+type instance Cons a (b, c, d, e) = (a, b, c, d, e)
+type instance Head (a, b, c, d, e) = a
+type instance Tail (a, b, c, d, e) = (b, c, d, e)
+type instance Init (a, b, c, d, e) = (a, b, c, d)
+type instance Last (a, b, c, d, e) = e
+type instance Length (a, b, c, d, e) = 5
+
+instance HasHead' (a, b, c, d, e) a where
+  head' (a, _, _, _, _) = a
+
+instance HasTail' (a, b, c, d, e) (b, c, d, e) where
+  tail' (_, b, c, d, e) = (b, c, d, e)
+
+instance HasInit' (a, b, c, d, e) (a, b, c, d) where
+  init' (a, b, c, d, _) = (a, b, c, d)
+
+instance HasLast' (a, b, c, d, e) e where
+  last' (_, _, _, _, e) = e
+
+instance HasCons' (a, b, c, d, e) a (b, c, d, e) where
+  cons' a (b, c, d, e) = (a, b, c, d, e)
+
+instance HasUncons' (a, b, c, d, e) a (b, c, d, e) where
+  uncons' (a, b, c, d, e) = (a, (b, c, d, e))
+
+instance HasHead (a, b, c, d, e)
+
+instance HasTail (a, b, c, d, e)
+
+instance HasInit (a, b, c, d, e)
+
+instance HasLast (a, b, c, d, e)
+
+instance HasCons a (b, c, d, e)
+
+instance HasUncons (a, b, c, d, e)
+
+instance HasLength (a, b, c, d, e)
+
+{-# COMPLETE Cons' :: (,,,,) #-}
+{-# COMPLETE Cons :: (,,,,) #-}
+
+-- 6
+
+type instance Cons a (b, c, d, e, f) = (a, b, c, d, e, f)
+type instance Head (a, b, c, d, e, f) = a
+type instance Tail (a, b, c, d, e, f) = (b, c, d, e, f)
+type instance Init (a, b, c, d, e, f) = (a, b, c, d, e)
+type instance Last (a, b, c, d, e, f) = f
+type instance Length (a, b, c, d, e, f) = 6
+
+instance HasHead' (a, b, c, d, e, f) a where
+  head' (a, _, _, _, _, _) = a
+
+instance HasTail' (a, b, c, d, e, f) (b, c, d, e, f) where
+  tail' (_, b, c, d, e, f) = (b, c, d, e, f)
+
+instance HasInit' (a, b, c, d, e, f) (a, b, c, d, e) where
+  init' (a, b, c, d, e, _) = (a, b, c, d, e)
+
+instance HasLast' (a, b, c, d, e, f) f where
+  last' (_, _, _, _, _, f) = f
+
+instance HasCons' (a, b, c, d, e, f) a (b, c, d, e, f) where
+  cons' a (b, c, d, e, f) = (a, b, c, d, e, f)
+
+instance HasUncons' (a, b, c, d, e, f) a (b, c, d, e, f) where
+  uncons' (a, b, c, d, e, f) = (a, (b, c, d, e, f))
+
+instance HasHead (a, b, c, d, e, f)
+
+instance HasTail (a, b, c, d, e, f)
+
+instance HasInit (a, b, c, d, e, f)
+
+instance HasLast (a, b, c, d, e, f)
+
+instance HasCons a (b, c, d, e, f)
+
+instance HasUncons (a, b, c, d, e, f)
+
+instance HasLength (a, b, c, d, e, f)
+
+{-# COMPLETE Cons' :: (,,,,,) #-}
+{-# COMPLETE Cons :: (,,,,,) #-}
+
+-- 7
+
+type instance Cons a (b, c, d, e, f, g) = (a, b, c, d, e, f, g)
+type instance Head (a, b, c, d, e, f, g) = a
+type instance Tail (a, b, c, d, e, f, g) = (b, c, d, e, f, g)
+type instance Init (a, b, c, d, e, f, g) = (a, b, c, d, e, f)
+type instance Last (a, b, c, d, e, f, g) = g
+type instance Length (a, b, c, d, e, f, g) = 7
+
+instance HasHead' (a, b, c, d, e, f, g) a where
+  head' (a, _, _, _, _, _, _) = a
+
+instance HasTail' (a, b, c, d, e, f, g) (b, c, d, e, f, g) where
+  tail' (_, b, c, d, e, f, g) = (b, c, d, e, f, g)
+
+instance HasInit' (a, b, c, d, e, f, g) (a, b, c, d, e, f) where
+  init' (a, b, c, d, e, f, _) = (a, b, c, d, e, f)
+
+instance HasLast' (a, b, c, d, e, f, g) g where
+  last' (_, _, _, _, _, _, g) = g
+
+instance HasCons' (a, b, c, d, e, f, g) a (b, c, d, e, f, g) where
+  cons' a (b, c, d, e, f, g) = (a, b, c, d, e, f, g)
+
+instance HasUncons' (a, b, c, d, e, f, g) a (b, c, d, e, f, g) where
+  uncons' (a, b, c, d, e, f, g) = (a, (b, c, d, e, f, g))
+
+instance HasHead (a, b, c, d, e, f, g)
+
+instance HasTail (a, b, c, d, e, f, g)
+
+instance HasInit (a, b, c, d, e, f, g)
+
+instance HasLast (a, b, c, d, e, f, g)
+
+instance HasCons a (b, c, d, e, f, g)
+
+instance HasUncons (a, b, c, d, e, f, g)
+
+instance HasLength (a, b, c, d, e, f, g)
+
+{-# COMPLETE Cons' :: (,,,,,,) #-}
+{-# COMPLETE Cons :: (,,,,,,) #-}
+
+-- 8
+
+type instance Cons a (b, c, d, e, f, g, h) = (a, b, c, d, e, f, g, h)
+type instance Head (a, b, c, d, e, f, g, h) = a
+type instance Tail (a, b, c, d, e, f, g, h) = (b, c, d, e, f, g, h)
+type instance Init (a, b, c, d, e, f, g, h) = (a, b, c, d, e, f, g)
+type instance Last (a, b, c, d, e, f, g, h) = h
+type instance Length (a, b, c, d, e, f, g, h) = 8
+
+instance HasHead' (a, b, c, d, e, f, g, h) a where
+  head' (a, _, _, _, _, _, _, _) = a
+
+instance HasTail' (a, b, c, d, e, f, g, h) (b, c, d, e, f, g, h) where
+  tail' (_, b, c, d, e, f, g, h) = (b, c, d, e, f, g, h)
+
+instance HasInit' (a, b, c, d, e, f, g, h) (a, b, c, d, e, f, g) where
+  init' (a, b, c, d, e, f, g, _) = (a, b, c, d, e, f, g)
+
+instance HasLast' (a, b, c, d, e, f, g, h) h where
+  last' (_, _, _, _, _, _, _, h) = h
+
+instance HasCons' (a, b, c, d, e, f, g, h) a (b, c, d, e, f, g, h) where
+  cons' a (b, c, d, e, f, g, h) = (a, b, c, d, e, f, g, h)
+
+instance HasUncons' (a, b, c, d, e, f, g, h) a (b, c, d, e, f, g, h) where
+  uncons' (a, b, c, d, e, f, g, h) = (a, (b, c, d, e, f, g, h))
+
+instance HasHead (a, b, c, d, e, f, g, h)
+
+instance HasTail (a, b, c, d, e, f, g, h)
+
+instance HasInit (a, b, c, d, e, f, g, h)
+
+instance HasLast (a, b, c, d, e, f, g, h)
+
+instance HasCons a (b, c, d, e, f, g, h)
+
+instance HasUncons (a, b, c, d, e, f, g, h)
+
+instance HasLength (a, b, c, d, e, f, g, h)
+
+{-# COMPLETE Cons' :: (,,,,,,,) #-}
+{-# COMPLETE Cons :: (,,,,,,,) #-}
+
+-- 9
+
+type instance Cons a (b, c, d, e, f, g, h, i) = (a, b, c, d, e, f, g, h, i)
+type instance Head (a, b, c, d, e, f, g, h, i) = a
+type instance Tail (a, b, c, d, e, f, g, h, i) = (b, c, d, e, f, g, h, i)
+type instance Init (a, b, c, d, e, f, g, h, i) = (a, b, c, d, e, f, g, h)
+type instance Last (a, b, c, d, e, f, g, h, i) = i
+type instance Length (a, b, c, d, e, f, g, h, i) = 9
+
+instance HasHead' (a, b, c, d, e, f, g, h, i) a where
+  head' (a, _, _, _, _, _, _, _, _) = a
+
+instance HasTail' (a, b, c, d, e, f, g, h, i) (b, c, d, e, f, g, h, i) where
+  tail' (_, b, c, d, e, f, g, h, i) = (b, c, d, e, f, g, h, i)
+
+instance HasInit' (a, b, c, d, e, f, g, h, i) (a, b, c, d, e, f, g, h) where
+  init' (a, b, c, d, e, f, g, h, _) = (a, b, c, d, e, f, g, h)
+
+instance HasLast' (a, b, c, d, e, f, g, h, i) i where
+  last' (_, _, _, _, _, _, _, _, i) = i
+
+instance HasCons' (a, b, c, d, e, f, g, h, i) a (b, c, d, e, f, g, h, i) where
+  cons' a (b, c, d, e, f, g, h, i) = (a, b, c, d, e, f, g, h, i)
+
+instance HasUncons' (a, b, c, d, e, f, g, h, i) a (b, c, d, e, f, g, h, i) where
+  uncons' (a, b, c, d, e, f, g, h, i) = (a, (b, c, d, e, f, g, h, i))
+
+instance HasHead (a, b, c, d, e, f, g, h, i)
+
+instance HasTail (a, b, c, d, e, f, g, h, i)
+
+instance HasInit (a, b, c, d, e, f, g, h, i)
+
+instance HasLast (a, b, c, d, e, f, g, h, i)
+
+instance HasCons a (b, c, d, e, f, g, h, i)
+
+instance HasUncons (a, b, c, d, e, f, g, h, i)
+
+instance HasLength (a, b, c, d, e, f, g, h, i)
+
+{-# COMPLETE Cons' :: (,,,,,,,,) #-}
+{-# COMPLETE Cons :: (,,,,,,,,) #-}
+
+-- 10
+
+type instance Cons a (b, c, d, e, f, g, h, i, j) = (a, b, c, d, e, f, g, h, i, j)
+type instance Head (a, b, c, d, e, f, g, h, i, j) = a
+type instance Tail (a, b, c, d, e, f, g, h, i, j) = (b, c, d, e, f, g, h, i, j)
+type instance Init (a, b, c, d, e, f, g, h, i, j) = (a, b, c, d, e, f, g, h, i)
+type instance Last (a, b, c, d, e, f, g, h, i, j) = j
+type instance Length (a, b, c, d, e, f, g, h, i, j) = 10
+
+instance HasHead' (a, b, c, d, e, f, g, h, i, j) a where
+  head' (a, _, _, _, _, _, _, _, _, _) = a
+
+instance HasTail' (a, b, c, d, e, f, g, h, i, j) (b, c, d, e, f, g, h, i, j) where
+  tail' (_, b, c, d, e, f, g, h, i, j) = (b, c, d, e, f, g, h, i, j)
+
+instance HasInit' (a, b, c, d, e, f, g, h, i, j) (a, b, c, d, e, f, g, h, i) where
+  init' (a, b, c, d, e, f, g, h, i, _) = (a, b, c, d, e, f, g, h, i)
+
+instance HasLast' (a, b, c, d, e, f, g, h, i, j) j where
+  last' (_, _, _, _, _, _, _, _, _, j) = j
+
+instance HasCons' (a, b, c, d, e, f, g, h, i, j) a (b, c, d, e, f, g, h, i, j) where
+  cons' a (b, c, d, e, f, g, h, i, j) = (a, b, c, d, e, f, g, h, i, j)
+
+instance HasUncons' (a, b, c, d, e, f, g, h, i, j) a (b, c, d, e, f, g, h, i, j) where
+  uncons' (a, b, c, d, e, f, g, h, i, j) = (a, (b, c, d, e, f, g, h, i, j))
+
+instance HasHead (a, b, c, d, e, f, g, h, i, j)
+
+instance HasTail (a, b, c, d, e, f, g, h, i, j)
+
+instance HasInit (a, b, c, d, e, f, g, h, i, j)
+
+instance HasLast (a, b, c, d, e, f, g, h, i, j)
+
+instance HasCons a (b, c, d, e, f, g, h, i, j)
+
+instance HasUncons (a, b, c, d, e, f, g, h, i, j)
+
+instance HasLength (a, b, c, d, e, f, g, h, i, j)
+
+{-# COMPLETE Cons' :: (,,,,,,,,,) #-}
+{-# COMPLETE Cons :: (,,,,,,,,,) #-}
+
+-- 11
+
+type instance Cons a (b, c, d, e, f, g, h, i, j, k) = (a, b, c, d, e, f, g, h, i, j, k)
+type instance Head (a, b, c, d, e, f, g, h, i, j, k) = a
+type instance Tail (a, b, c, d, e, f, g, h, i, j, k) = (b, c, d, e, f, g, h, i, j, k)
+type instance Init (a, b, c, d, e, f, g, h, i, j, k) = (a, b, c, d, e, f, g, h, i, j)
+type instance Last (a, b, c, d, e, f, g, h, i, j, k) = k
+type instance Length (a, b, c, d, e, f, g, h, i, j, k) = 11
+
+instance HasHead' (a, b, c, d, e, f, g, h, i, j, k) a where
+  head' (a, _, _, _, _, _, _, _, _, _, _) = a
+
+instance HasTail' (a, b, c, d, e, f, g, h, i, j, k) (b, c, d, e, f, g, h, i, j, k) where
+  tail' (_, b, c, d, e, f, g, h, i, j, k) = (b, c, d, e, f, g, h, i, j, k)
+
+instance HasInit' (a, b, c, d, e, f, g, h, i, j, k) (a, b, c, d, e, f, g, h, i, j) where
+  init' (a, b, c, d, e, f, g, h, i, j, _) = (a, b, c, d, e, f, g, h, i, j)
+
+instance HasLast' (a, b, c, d, e, f, g, h, i, j, k) k where
+  last' (_, _, _, _, _, _, _, _, _, _, k) = k
+
+instance HasCons' (a, b, c, d, e, f, g, h, i, j, k) a (b, c, d, e, f, g, h, i, j, k) where
+  cons' a (b, c, d, e, f, g, h, i, j, k) = (a, b, c, d, e, f, g, h, i, j, k)
+
+instance HasUncons' (a, b, c, d, e, f, g, h, i, j, k) a (b, c, d, e, f, g, h, i, j, k) where
+  uncons' (a, b, c, d, e, f, g, h, i, j, k) = (a, (b, c, d, e, f, g, h, i, j, k))
+
+instance HasHead (a, b, c, d, e, f, g, h, i, j, k)
+
+instance HasTail (a, b, c, d, e, f, g, h, i, j, k)
+
+instance HasInit (a, b, c, d, e, f, g, h, i, j, k)
+
+instance HasLast (a, b, c, d, e, f, g, h, i, j, k)
+
+instance HasCons a (b, c, d, e, f, g, h, i, j, k)
+
+instance HasUncons (a, b, c, d, e, f, g, h, i, j, k)
+
+instance HasLength (a, b, c, d, e, f, g, h, i, j, k)
+
+{-# COMPLETE Cons' :: (,,,,,,,,,,) #-}
+{-# COMPLETE Cons :: (,,,,,,,,,,) #-}
+
+-- 12
+
+type instance Cons a (b, c, d, e, f, g, h, i, j, k, l) = (a, b, c, d, e, f, g, h, i, j, k, l)
+type instance Head (a, b, c, d, e, f, g, h, i, j, k, l) = a
+type instance Tail (a, b, c, d, e, f, g, h, i, j, k, l) = (b, c, d, e, f, g, h, i, j, k, l)
+type instance Init (a, b, c, d, e, f, g, h, i, j, k, l) = (a, b, c, d, e, f, g, h, i, j, k)
+type instance Last (a, b, c, d, e, f, g, h, i, j, k, l) = l
+type instance Length (a, b, c, d, e, f, g, h, i, j, k, l) = 12
+
+instance HasHead' (a, b, c, d, e, f, g, h, i, j, k, l) a where
+  head' (a, _, _, _, _, _, _, _, _, _, _, _) = a
+
+instance HasTail' (a, b, c, d, e, f, g, h, i, j, k, l) (b, c, d, e, f, g, h, i, j, k, l) where
+  tail' (_, b, c, d, e, f, g, h, i, j, k, l) = (b, c, d, e, f, g, h, i, j, k, l)
+
+instance HasInit' (a, b, c, d, e, f, g, h, i, j, k, l) (a, b, c, d, e, f, g, h, i, j, k) where
+  init' (a, b, c, d, e, f, g, h, i, j, k, _) = (a, b, c, d, e, f, g, h, i, j, k)
+
+instance HasLast' (a, b, c, d, e, f, g, h, i, j, k, l) l where
+  last' (_, _, _, _, _, _, _, _, _, _, _, l) = l
+
+instance HasCons' (a, b, c, d, e, f, g, h, i, j, k, l) a (b, c, d, e, f, g, h, i, j, k, l) where
+  cons' a (b, c, d, e, f, g, h, i, j, k, l) = (a, b, c, d, e, f, g, h, i, j, k, l)
+
+instance HasUncons' (a, b, c, d, e, f, g, h, i, j, k, l) a (b, c, d, e, f, g, h, i, j, k, l) where
+  uncons' (a, b, c, d, e, f, g, h, i, j, k, l) = (a, (b, c, d, e, f, g, h, i, j, k, l))
+
+instance HasHead (a, b, c, d, e, f, g, h, i, j, k, l)
+
+instance HasTail (a, b, c, d, e, f, g, h, i, j, k, l)
+
+instance HasInit (a, b, c, d, e, f, g, h, i, j, k, l)
+
+instance HasLast (a, b, c, d, e, f, g, h, i, j, k, l)
+
+instance HasCons a (b, c, d, e, f, g, h, i, j, k, l)
+
+instance HasUncons (a, b, c, d, e, f, g, h, i, j, k, l)
+
+instance HasLength (a, b, c, d, e, f, g, h, i, j, k, l)
+
+{-# COMPLETE Cons' :: (,,,,,,,,,,,) #-}
+{-# COMPLETE Cons :: (,,,,,,,,,,,) #-}
+
+-- 13
+
+type instance Cons a (b, c, d, e, f, g, h, i, j, k, l, m) = (a, b, c, d, e, f, g, h, i, j, k, l, m)
+type instance Head (a, b, c, d, e, f, g, h, i, j, k, l, m) = a
+type instance Tail (a, b, c, d, e, f, g, h, i, j, k, l, m) = (b, c, d, e, f, g, h, i, j, k, l, m)
+type instance Init (a, b, c, d, e, f, g, h, i, j, k, l, m) = (a, b, c, d, e, f, g, h, i, j, k, l)
+type instance Last (a, b, c, d, e, f, g, h, i, j, k, l, m) = m
+type instance Length (a, b, c, d, e, f, g, h, i, j, k, l, m) = 13
+
+instance HasHead' (a, b, c, d, e, f, g, h, i, j, k, l, m) a where
+  head' (a, _, _, _, _, _, _, _, _, _, _, _, _) = a
+
+instance HasTail' (a, b, c, d, e, f, g, h, i, j, k, l, m) (b, c, d, e, f, g, h, i, j, k, l, m) where
+  tail' (_, b, c, d, e, f, g, h, i, j, k, l, m) = (b, c, d, e, f, g, h, i, j, k, l, m)
+
+instance HasInit' (a, b, c, d, e, f, g, h, i, j, k, l, m) (a, b, c, d, e, f, g, h, i, j, k, l) where
+  init' (a, b, c, d, e, f, g, h, i, j, k, l, _) = (a, b, c, d, e, f, g, h, i, j, k, l)
+
+instance HasLast' (a, b, c, d, e, f, g, h, i, j, k, l, m) m where
+  last' (_, _, _, _, _, _, _, _, _, _, _, _, m) = m
+
+instance HasCons' (a, b, c, d, e, f, g, h, i, j, k, l, m) a (b, c, d, e, f, g, h, i, j, k, l, m) where
+  cons' a (b, c, d, e, f, g, h, i, j, k, l, m) = (a, b, c, d, e, f, g, h, i, j, k, l, m)
+
+instance HasUncons' (a, b, c, d, e, f, g, h, i, j, k, l, m) a (b, c, d, e, f, g, h, i, j, k, l, m) where
+  uncons' (a, b, c, d, e, f, g, h, i, j, k, l, m) = (a, (b, c, d, e, f, g, h, i, j, k, l, m))
+
+instance HasHead (a, b, c, d, e, f, g, h, i, j, k, l, m)
+
+instance HasTail (a, b, c, d, e, f, g, h, i, j, k, l, m)
+
+instance HasInit (a, b, c, d, e, f, g, h, i, j, k, l, m)
+
+instance HasLast (a, b, c, d, e, f, g, h, i, j, k, l, m)
+
+instance HasCons a (b, c, d, e, f, g, h, i, j, k, l, m)
+
+instance HasUncons (a, b, c, d, e, f, g, h, i, j, k, l, m)
+
+instance HasLength (a, b, c, d, e, f, g, h, i, j, k, l, m)
+
+{-# COMPLETE Cons' :: (,,,,,,,,,,,,) #-}
+{-# COMPLETE Cons :: (,,,,,,,,,,,,) #-}
+
+-- 14
+
+type instance Cons a (b, c, d, e, f, g, h, i, j, k, l, m, n) = (a, b, c, d, e, f, g, h, i, j, k, l, m, n)
+type instance Head (a, b, c, d, e, f, g, h, i, j, k, l, m, n) = a
+type instance Tail (a, b, c, d, e, f, g, h, i, j, k, l, m, n) = (b, c, d, e, f, g, h, i, j, k, l, m, n)
+type instance Init (a, b, c, d, e, f, g, h, i, j, k, l, m, n) = (a, b, c, d, e, f, g, h, i, j, k, l, m)
+type instance Last (a, b, c, d, e, f, g, h, i, j, k, l, m, n) = n
+type instance Length (a, b, c, d, e, f, g, h, i, j, k, l, m, n) = 14
+
+instance HasHead' (a, b, c, d, e, f, g, h, i, j, k, l, m, n) a where
+  head' (a, _, _, _, _, _, _, _, _, _, _, _, _, _) = a
+
+instance HasTail' (a, b, c, d, e, f, g, h, i, j, k, l, m, n) (b, c, d, e, f, g, h, i, j, k, l, m, n) where
+  tail' (_, b, c, d, e, f, g, h, i, j, k, l, m, n) = (b, c, d, e, f, g, h, i, j, k, l, m, n)
+
+instance HasInit' (a, b, c, d, e, f, g, h, i, j, k, l, m, n) (a, b, c, d, e, f, g, h, i, j, k, l, m) where
+  init' (a, b, c, d, e, f, g, h, i, j, k, l, m, _) = (a, b, c, d, e, f, g, h, i, j, k, l, m)
+
+instance HasLast' (a, b, c, d, e, f, g, h, i, j, k, l, m, n) n where
+  last' (_, _, _, _, _, _, _, _, _, _, _, _, _, n) = n
+
+instance HasCons' (a, b, c, d, e, f, g, h, i, j, k, l, m, n) a (b, c, d, e, f, g, h, i, j, k, l, m, n) where
+  cons' a (b, c, d, e, f, g, h, i, j, k, l, m, n) = (a, b, c, d, e, f, g, h, i, j, k, l, m, n)
+
+instance HasUncons' (a, b, c, d, e, f, g, h, i, j, k, l, m, n) a (b, c, d, e, f, g, h, i, j, k, l, m, n) where
+  uncons' (a, b, c, d, e, f, g, h, i, j, k, l, m, n) = (a, (b, c, d, e, f, g, h, i, j, k, l, m, n))
+
+instance HasHead (a, b, c, d, e, f, g, h, i, j, k, l, m, n)
+
+instance HasTail (a, b, c, d, e, f, g, h, i, j, k, l, m, n)
+
+instance HasInit (a, b, c, d, e, f, g, h, i, j, k, l, m, n)
+
+instance HasLast (a, b, c, d, e, f, g, h, i, j, k, l, m, n)
+
+instance HasCons a (b, c, d, e, f, g, h, i, j, k, l, m, n)
+
+instance HasUncons (a, b, c, d, e, f, g, h, i, j, k, l, m, n)
+
+instance HasLength (a, b, c, d, e, f, g, h, i, j, k, l, m, n)
+
+{-# COMPLETE Cons' :: (,,,,,,,,,,,,,) #-}
+{-# COMPLETE Cons :: (,,,,,,,,,,,,,) #-}
+
+-- 15
+
+type instance Cons a (b, c, d, e, f, g, h, i, j, k, l, m, n, o) = (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o)
+type instance Head (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o) = a
+type instance Tail (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o) = (b, c, d, e, f, g, h, i, j, k, l, m, n, o)
+type instance Init (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o) = (a, b, c, d, e, f, g, h, i, j, k, l, m, n)
+type instance Last (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o) = o
+type instance Length (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o) = 15
+
+instance HasHead' (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o) a where
+  head' (a, _, _, _, _, _, _, _, _, _, _, _, _, _, _) = a
+
+instance HasTail' (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o) (b, c, d, e, f, g, h, i, j, k, l, m, n, o) where
+  tail' (_, b, c, d, e, f, g, h, i, j, k, l, m, n, o) = (b, c, d, e, f, g, h, i, j, k, l, m, n, o)
+
+instance HasInit' (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o) (a, b, c, d, e, f, g, h, i, j, k, l, m, n) where
+  init' (a, b, c, d, e, f, g, h, i, j, k, l, m, n, _) = (a, b, c, d, e, f, g, h, i, j, k, l, m, n)
+
+instance HasLast' (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o) o where
+  last' (_, _, _, _, _, _, _, _, _, _, _, _, _, _, o) = o
+
+instance HasCons' (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o) a (b, c, d, e, f, g, h, i, j, k, l, m, n, o) where
+  cons' a (b, c, d, e, f, g, h, i, j, k, l, m, n, o) = (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o)
+
+instance HasUncons' (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o) a (b, c, d, e, f, g, h, i, j, k, l, m, n, o) where
+  uncons' (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o) = (a, (b, c, d, e, f, g, h, i, j, k, l, m, n, o))
+
+instance HasHead (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o)
+
+instance HasTail (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o)
+
+instance HasInit (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o)
+
+instance HasLast (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o)
+
+instance HasCons a (b, c, d, e, f, g, h, i, j, k, l, m, n, o)
+
+instance HasUncons (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o)
+
+instance HasLength (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o)
+
+{-# COMPLETE Cons' :: (,,,,,,,,,,,,,,) #-}
+{-# COMPLETE Cons :: (,,,,,,,,,,,,,,) #-}

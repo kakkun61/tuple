@@ -41,3 +41,9 @@ library:
   - single-tuple
   - OneTuple
   - Only
+
+custom-setup:
+  dependencies:
+  - base
+  - Cabal
+  - directory
