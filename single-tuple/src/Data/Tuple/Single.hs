@@ -1,4 +1,5 @@
 {-# LANGUAGE PatternSynonyms #-}
+{-# LANGUAGE Safe            #-}
 {-# LANGUAGE ViewPatterns    #-}
 
 module Data.Tuple.Single

@@ -1,9 +1,21 @@
 {-# LANGUAGE DataKinds             #-}
 {-# LANGUAGE FlexibleInstances     #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE Safe                  #-}
 {-# LANGUAGE TypeFamilies          #-}
 
 {-# OPTIONS_GHC -Wno-orphans #-}
+
+{-# OPTIONS_HADDOCK show-extensions #-}
+
+-- |
+-- Copyright   :  Kazuki Okamoto
+-- License     :  see LICENSE
+-- Maintainer  :  kazuki.okamoto@kakkun61.com
+-- Stability   :  experimental
+-- Portability :  GHC
+--
+-- List-like operations for 'Data.Functor.Identity.Identity'.
 
 module Data.Tuple.List.Identity () where
 

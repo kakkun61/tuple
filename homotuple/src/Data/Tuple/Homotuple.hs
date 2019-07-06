@@ -1,18 +1,29 @@
 {-# LANGUAGE DataKinds              #-}
 {-# LANGUAGE FlexibleContexts       #-}
 {-# LANGUAGE FlexibleInstances      #-}
+{-# LANGUAGE Trustworthy            #-}
 {-# LANGUAGE TypeFamilies           #-}
 {-# LANGUAGE TypeFamilyDependencies #-}
 {-# LANGUAGE TypeOperators          #-}
 
 {-# OPTIONS_GHC -Wno-orphans #-}
 
+{-# OPTIONS_HADDOCK show-extensions #-}
+
+-- |
+-- Copyright   :  Kazuki Okamoto
+-- License     :  see LICENSE
+-- Maintainer  :  kazuki.okamoto@kakkun61.com
+-- Stability   :  experimental
+-- Portability :  GHC
+--
+-- Homotuples, whoes items are the same type or which are lists with type-level length.
+
 module Data.Tuple.Homotuple
   ( Homotuple
     -- * List-like
   , map
     -- * Semigoupe-like
-  , append
   , (<>)
     -- * Monid-like
   , empty
@@ -261,7 +272,7 @@ map f = fromList . L.map f . toList
 
 -- Semigroup-like
 
-append, (<>)
+(<>)
   :: ( IsList (Homotuple n1 a)
      , IsList (Homotuple n2 a)
      , IsList (Homotuple (n1 + n2) a)
@@ -272,11 +283,9 @@ append, (<>)
   => Homotuple n1 a
   -> Homotuple n2 a
   -> Homotuple (n1 + n2) a
-append a b = fromList $ toList a S.<> toList b
+a <> b = fromList $ toList a S.<> toList b
 
-(<>) = append
-
-infixr 6 `append`, <>
+infixr 6 <>
 
 -- Monoid-like
 

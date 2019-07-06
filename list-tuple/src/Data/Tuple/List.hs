@@ -4,12 +4,31 @@
 {-# LANGUAGE FlexibleInstances     #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE PatternSynonyms       #-}
+{-# LANGUAGE Safe                  #-}
 {-# LANGUAGE ScopedTypeVariables   #-}
 {-# LANGUAGE TypeFamilies          #-}
 {-# LANGUAGE UndecidableInstances  #-}
 {-# LANGUAGE ViewPatterns          #-}
 
-{-# OPTIONS_GHC -Wno-redundant-constraints#-}
+{-# OPTIONS_GHC -Wno-redundant-constraints #-}
+
+{-# OPTIONS_HADDOCK show-extensions #-}
+
+-- |
+-- Copyright   :  Kazuki Okamoto
+-- License     :  see LICENSE
+-- Maintainer  :  kazuki.okamoto@kakkun61.com
+-- Stability   :  experimental
+-- Portability :  GHC
+--
+-- List-like operations for tuples.
+--
+-- This is a bit tricky of classes because Haskell does not have 1-tuples.
+-- If you use 'Data.Tuple.Only.Only', 'Data.Tuple.OneTuple.OneTuple' or 'Data.Functor.Identity.Identity' as 1-tuples,
+-- import @Data.Tuple.List.Only@, @Data.Tuple.List.OneTuple@ or @Data.Tuple.List.Identity@ respectively
+-- and classes without a prime (dash) symbol, for examle 'HasHead'', are useful,
+-- you can also use classes with a prime (dash) symbol.
+-- If you use 'Data.Tuple.Single.Single' class for polymorphic 1-tuples, you should use classes with a prime (dash) symbol.
 
 module Data.Tuple.List
   ( -- * Type families
@@ -20,6 +39,7 @@ module Data.Tuple.List
   , Init
   , Length
     -- * Type classes
+    -- This clases are for all n-tuples including abstract 1-tuples, 2-tuples.
   , HasHead' (..)
   , HasLast' (..)
   , HasTail' (..)
@@ -27,6 +47,7 @@ module Data.Tuple.List
   , HasCons' (..)
   , HasUncons' (..)
     -- * More concrete type classes
+    -- This classes are for n-tuples (n ≧ 2) and for concrete 1-tuples, 2-tupes.
   , HasHead (..)
   , HasLast (..)
   , HasTail (..)
@@ -111,6 +132,17 @@ class HasLength t where
   default length :: (Integral n, KnownNat (Length t)) => t -> n
   length _ = fromInteger $ natVal (Proxy :: Proxy (Length t))
 
+pattern Null :: HasLength t => t
+pattern Null <- (length -> 0 :: Int)
+
+pattern Cons' :: (HasCons' t a u, HasUncons' t a u) => a -> u -> t
+pattern Cons' a u <- (uncons' -> (a, u)) where
+  Cons' a u = cons' a u
+
+pattern Cons :: (HasCons a u, HasUncons t, t ~ Cons a u, a ~ Head t, u ~ Tail t) => a -> u -> t
+pattern Cons a u <- (uncons -> (a, u)) where
+  Cons a u = cons a u
+
 -- 0
 
 type instance Head () = TypeError (Text "empty tuple")
@@ -120,6 +152,8 @@ type instance Init () = TypeError (Text "empty tuple")
 type instance Length () = 0
 
 instance HasLength ()
+
+{-# COMPLETE Null :: () #-}
 
 -- 1
 
@@ -140,6 +174,13 @@ instance Single c => HasCons' (c a) a () where
 
 instance Single c => HasUncons' (c a) a () where
   uncons' t = (unwrap t, ())
+
+{-# COMPLETE Cons' :: Identity #-}
+{-# COMPLETE Cons' :: OneTuple #-}
+{-# COMPLETE Cons' :: Only #-}
+{-# COMPLETE Cons :: Identity #-}
+{-# COMPLETE Cons :: OneTuple #-}
+{-# COMPLETE Cons :: Only #-}
 
 -- 2
 
@@ -170,6 +211,9 @@ instance HasHead (a, b)
 instance HasLast (a, b)
 
 instance HasLength (a, b)
+
+{-# COMPLETE Cons' :: (,) #-}
+{-# COMPLETE Cons :: (,) #-}
 
 -- 3
 
@@ -212,6 +256,9 @@ instance HasUncons (a, b, c)
 
 instance HasLength (a, b, c)
 
+{-# COMPLETE Cons' :: (,,) #-}
+{-# COMPLETE Cons :: (,,) #-}
+
 -- 4
 
 type instance Cons a (b, c, d) = (a, b, c, d)
@@ -253,23 +300,5 @@ instance HasUncons (a, b, c, d)
 
 instance HasLength (a, b, c, d)
 
--- patterns
-
-pattern Null :: HasLength t => t
-pattern Null <- (length -> 0 :: Int)
-
-pattern Cons' :: (HasCons' t a u, HasUncons' t a u) => a -> u -> t
-pattern Cons' a u <- (uncons' -> (a, u)) where
-  Cons' a u = cons' a u
-
-pattern Cons :: (HasCons a u, HasUncons t, t ~ Cons a u, a ~ Head t, u ~ Tail t) => a -> u -> t
-pattern Cons a u <- (uncons -> (a, u)) where
-  Cons a u = cons a u
-
-{-# COMPLETE Null :: () #-}
-{-# COMPLETE Cons :: Identity #-}
-{-# COMPLETE Cons :: OneTuple #-}
-{-# COMPLETE Cons :: Only #-}
-{-# COMPLETE Cons :: (,) #-}
-{-# COMPLETE Cons :: (,,) #-}
+{-# COMPLETE Cons' :: (,,,) #-}
 {-# COMPLETE Cons :: (,,,) #-}

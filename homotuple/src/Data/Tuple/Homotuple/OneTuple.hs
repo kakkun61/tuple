@@ -1,7 +1,19 @@
 {-# LANGUAGE DataKinds    #-}
+{-# LANGUAGE Trustworthy  #-}
 {-# LANGUAGE TypeFamilies #-}
 
 {-# OPTIONS_GHC -Wno-orphans #-}
+
+{-# OPTIONS_HADDOCK show-extensions #-}
+
+-- |
+-- Copyright   :  Kazuki Okamoto
+-- License     :  see LICENSE
+-- Maintainer  :  kazuki.okamoto@kakkun61.com
+-- Stability   :  experimental
+-- Portability :  GHC
+--
+-- Single homotuples.
 
 module Data.Tuple.Homotuple.OneTuple () where
 
