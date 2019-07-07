@@ -2,6 +2,17 @@
 {-# LANGUAGE Safe            #-}
 {-# LANGUAGE ViewPatterns    #-}
 
+{-# OPTIONS_HADDOCK show-extensions #-}
+
+-- |
+-- Copyright   :  Kazuki Okamoto
+-- License     :  see LICENSE
+-- Maintainer  :  kazuki.okamoto@kakkun61.com
+-- Stability   :  experimental
+-- Portability :  GHC
+--
+-- A class for 1-tuples.
+
 module Data.Tuple.Single
   ( Single (..)
   , pattern Single
