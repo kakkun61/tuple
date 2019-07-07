@@ -1,14 +1,16 @@
-{-# LANGUAGE DataKinds             #-}
-{-# LANGUAGE DefaultSignatures     #-}
-{-# LANGUAGE FlexibleContexts      #-}
-{-# LANGUAGE FlexibleInstances     #-}
-{-# LANGUAGE MultiParamTypeClasses #-}
-{-# LANGUAGE PatternSynonyms       #-}
-{-# LANGUAGE Safe                  #-}
-{-# LANGUAGE ScopedTypeVariables   #-}
-{-# LANGUAGE TypeFamilies          #-}
-{-# LANGUAGE UndecidableInstances  #-}
-{-# LANGUAGE ViewPatterns          #-}
+{-# LANGUAGE DataKinds              #-}
+{-# LANGUAGE DefaultSignatures      #-}
+{-# LANGUAGE FlexibleContexts       #-}
+{-# LANGUAGE FlexibleInstances      #-}
+{-# LANGUAGE MultiParamTypeClasses  #-}
+{-# LANGUAGE PatternSynonyms        #-}
+{-# LANGUAGE Safe                   #-}
+{-# LANGUAGE ScopedTypeVariables    #-}
+{-# LANGUAGE TypeFamilies           #-}
+{-# LANGUAGE TypeFamilyDependencies #-}
+{-# LANGUAGE TypeOperators          #-}
+{-# LANGUAGE UndecidableInstances   #-}
+{-# LANGUAGE ViewPatterns           #-}
 
 {-# OPTIONS_GHC -Wno-redundant-constraints #-}
 
@@ -31,14 +33,15 @@
 -- If you use 'Data.Tuple.Single.Single' class for polymorphic 1-tuples, you should use classes with a prime (dash) symbol.
 
 module Data.Tuple.List
-  ( -- * Type families
+  ( -- * Basic functions
+    -- ** Type families
     Cons
   , Head
   , Last
   , Tail
   , Init
   , Length
-    -- * Type classes
+    -- ** Type classes
     -- This clases are for all n-tuples including abstract 1-tuples, 2-tuples.
   , HasHead' (..)
   , HasLast' (..)
@@ -46,7 +49,7 @@ module Data.Tuple.List
   , HasInit' (..)
   , HasCons' (..)
   , HasUncons' (..)
-    -- * More concrete type classes
+    -- ** More concrete type classes
     -- This classes are for n-tuples (n ≧ 2) and for concrete 1-tuples, 2-tupes.
   , HasHead (..)
   , HasLast (..)
@@ -55,13 +58,20 @@ module Data.Tuple.List
   , HasCons (..)
   , HasUncons (..)
   , HasLength (..)
-    -- * Patterns
+    -- ** Patterns
   , pattern Null
   , pattern Cons'
   , pattern Cons
+    -- * List transfomations
+  , Reverse
+  , HasReverse (..)
+    -- * Indexing tuples
+  , type (!!)
+  , HasAt' (..)
+  , HasAt (..)
   ) where
 
-import           Prelude               (Int, Integral, fromInteger, ($))
+import           Prelude               (Int, Integral, fromInteger, id, ($))
 
 import           Data.Functor.Identity (Identity)
 import           Data.Kind             (Type)
@@ -71,6 +81,8 @@ import           Data.Tuple.Only       (Only)
 import           Data.Tuple.Single     (Single (unwrap, wrap))
 import           GHC.TypeLits          (ErrorMessage (Text), KnownNat, Nat,
                                         TypeError, natVal)
+
+-- Basic functions
 
 type family Cons a u :: Type
 type family Head t :: Type
@@ -143,6 +155,30 @@ pattern Cons :: (HasCons a u, HasUncons t, t ~ Cons a u, a ~ Head t, u ~ Tail t)
 pattern Cons a u <- (uncons -> (a, u)) where
   Cons a u = cons a u
 
+-- List transformations
+
+type family Reverse t = (r :: Type) | r -> t
+
+class HasReverse' t r where
+  reverse' :: t -> r
+
+class HasReverse t where
+  reverse :: t -> Reverse t
+  default reverse :: HasReverse' t (Reverse t) => t -> Reverse t
+  reverse = reverse'
+
+-- Indexing tuples
+
+type family t !! (n :: Nat) :: Type
+
+class HasAt' t (n :: Nat) e where
+  (!!!) :: t -> proxy n -> e
+
+class HasAt t (n :: Nat) where
+  (!!) :: t -> proxy n -> t !! n
+  default (!!) :: HasAt' t n (t !! n) => t -> proxy n -> t !! n
+  (!!) = (!!!)
+
 -- 0
 
 type instance Head () = TypeError (Text "empty tuple")
@@ -154,6 +190,13 @@ type instance Length () = 0
 instance HasLength ()
 
 {-# COMPLETE Null :: () #-}
+
+type instance Reverse () = ()
+
+instance HasReverse' () () where
+  reverse' = id
+
+instance HasReverse ()
 
 -- 1
 
@@ -181,6 +224,12 @@ instance Single c => HasUncons' (c a) a () where
 {-# COMPLETE Cons :: Identity #-}
 {-# COMPLETE Cons :: OneTuple #-}
 {-# COMPLETE Cons :: Only #-}
+
+instance Single c => HasReverse' (c a) (c a) where
+  reverse' = id
+
+instance Single c => HasAt' (c a) 0 a where
+  t !!! _ = unwrap t
 
 -- 2
 
@@ -214,6 +263,27 @@ instance HasLength (a, b)
 
 {-# COMPLETE Cons' :: (,) #-}
 {-# COMPLETE Cons :: (,) #-}
+
+type instance Reverse (a, b) = (b, a)
+
+instance HasReverse' (a, b) (b, a) where
+  reverse' (a, b) = (b, a)
+
+instance HasReverse (a, b)
+
+type instance (a, b) !! 0 = a
+
+instance HasAt' (a, b) 0 a where
+  (a, _) !!! _ = a
+
+instance HasAt (a, b) 0
+
+type instance (a, b) !! 1 = b
+
+instance HasAt' (a, b) 1 b where
+  (_, b) !!! _ = b
+
+instance HasAt (a, b) 1
 
 -- 3
 
@@ -259,13 +329,41 @@ instance HasLength (a, b, c)
 {-# COMPLETE Cons' :: (,,) #-}
 {-# COMPLETE Cons :: (,,) #-}
 
+type instance Reverse (a, b, c) = (c, b, a)
+
+instance HasReverse' (a, b, c) (c, b, a) where
+  reverse' (a, b, c) = (c, b, a)
+
+instance HasReverse (a, b, c)
+
+type instance (a, b, c) !! 0 = a
+
+instance HasAt' (a, b, c) 0 a where
+  (a, _, _) !!! _ = a
+
+instance HasAt (a, b, c) 0
+
+type instance (a, b, c) !! 1 = b
+
+instance HasAt' (a, b, c) 1 b where
+  (_, b, _) !!! _ = b
+
+instance HasAt (a, b, c) 1
+
+type instance (a, b, c) !! 2 = c
+
+instance HasAt' (a, b, c) 2 c where
+  (_, _, c) !!! _ = c
+
+instance HasAt (a, b, c) 2
+
 -- 4
 
 type instance Cons a (b, c, d) = (a, b, c, d)
 type instance Head (a, b, c, d) = a
-type instance Last (a, b, c, d) = d
 type instance Tail (a, b, c, d) = (b, c, d)
 type instance Init (a, b, c, d) = (a, b, c)
+type instance Last (a, b, c, d) = d
 type instance Length (a, b, c, d) = 4
 
 instance HasHead' (a, b, c, d) a where
@@ -302,6 +400,41 @@ instance HasLength (a, b, c, d)
 
 {-# COMPLETE Cons' :: (,,,) #-}
 {-# COMPLETE Cons :: (,,,) #-}
+
+type instance Reverse (a, b, c, d) = (d, c, b, a)
+
+instance HasReverse' (a, b, c, d) (d, c, b, a) where
+  reverse' (a, b, c, d) = (d, c, b, a)
+
+instance HasReverse (a, b, c, d)
+
+type instance (a, b, c, d) !! 0 = a
+
+instance HasAt' (a, b, c, d) 0 a where
+  (a, _, _, _) !!! _ = a
+
+instance HasAt (a, b, c, d) 0
+
+type instance (a, b, c, d) !! 1 = b
+
+instance HasAt' (a, b, c, d) 1 b where
+  (_, b, _, _) !!! _ = b
+
+instance HasAt (a, b, c, d) 1
+
+type instance (a, b, c, d) !! 2 = c
+
+instance HasAt' (a, b, c, d) 2 c where
+  (_, _, c, _) !!! _ = c
+
+instance HasAt (a, b, c, d) 2
+
+type instance (a, b, c, d) !! 3 = d
+
+instance HasAt' (a, b, c, d) 3 d where
+  (_, _, _, d) !!! _ = d
+
+instance HasAt (a, b, c, d) 3
 
 -- 5
 
@@ -347,6 +480,48 @@ instance HasLength (a, b, c, d, e)
 {-# COMPLETE Cons' :: (,,,,) #-}
 {-# COMPLETE Cons :: (,,,,) #-}
 
+type instance Reverse (a, b, c, d, e) = (e, d, c, b, a)
+
+instance HasReverse' (a, b, c, d, e) (e, d, c, b, a) where
+  reverse' (a, b, c, d, e) = (e, d, c, b, a)
+
+instance HasReverse (a, b, c, d, e)
+
+type instance (a, b, c, d, e) !! 0 = a
+
+instance HasAt' (a, b, c, d, e) 0 a where
+  (a, _, _, _, _) !!! _ = a
+
+instance HasAt (a, b, c, d, e) 0
+
+type instance (a, b, c, d, e) !! 1 = b
+
+instance HasAt' (a, b, c, d, e) 1 b where
+  (_, b, _, _, _) !!! _ = b
+
+instance HasAt (a, b, c, d, e) 1
+
+type instance (a, b, c, d, e) !! 2 = c
+
+instance HasAt' (a, b, c, d, e) 2 c where
+  (_, _, c, _, _) !!! _ = c
+
+instance HasAt (a, b, c, d, e) 2
+
+type instance (a, b, c, d, e) !! 3 = d
+
+instance HasAt' (a, b, c, d, e) 3 d where
+  (_, _, _, d, _) !!! _ = d
+
+instance HasAt (a, b, c, d, e) 3
+
+type instance (a, b, c, d, e) !! 4 = e
+
+instance HasAt' (a, b, c, d, e) 4 e where
+  (_, _, _, _, e) !!! _ = e
+
+instance HasAt (a, b, c, d, e) 4
+
 -- 6
 
 type instance Cons a (b, c, d, e, f) = (a, b, c, d, e, f)
@@ -390,6 +565,55 @@ instance HasLength (a, b, c, d, e, f)
 
 {-# COMPLETE Cons' :: (,,,,,) #-}
 {-# COMPLETE Cons :: (,,,,,) #-}
+
+type instance Reverse (a, b, c, d, e, f) = (f, e, d, c, b, a)
+
+instance HasReverse' (a, b, c, d, e, f) (f, e, d, c, b, a) where
+  reverse' (a, b, c, d, e, f) = (f, e, d, c, b, a)
+
+instance HasReverse (a, b, c, d, e, f)
+
+type instance (a, b, c, d, e, f) !! 0 = a
+
+instance HasAt' (a, b, c, d, e, f) 0 a where
+  (a, _, _, _, _, _) !!! _ = a
+
+instance HasAt (a, b, c, d, e, f) 0
+
+type instance (a, b, c, d, e, f) !! 1 = b
+
+instance HasAt' (a, b, c, d, e, f) 1 b where
+  (_, b, _, _, _, _) !!! _ = b
+
+instance HasAt (a, b, c, d, e, f) 1
+
+type instance (a, b, c, d, e, f) !! 2 = c
+
+instance HasAt' (a, b, c, d, e, f) 2 c where
+  (_, _, c, _, _, _) !!! _ = c
+
+instance HasAt (a, b, c, d, e, f) 2
+
+type instance (a, b, c, d, e, f) !! 3 = d
+
+instance HasAt' (a, b, c, d, e, f) 3 d where
+  (_, _, _, d, _, _) !!! _ = d
+
+instance HasAt (a, b, c, d, e, f) 3
+
+type instance (a, b, c, d, e, f) !! 4 = e
+
+instance HasAt' (a, b, c, d, e, f) 4 e where
+  (_, _, _, _, e, _) !!! _ = e
+
+instance HasAt (a, b, c, d, e, f) 4
+
+type instance (a, b, c, d, e, f) !! 5 = f
+
+instance HasAt' (a, b, c, d, e, f) 5 f where
+  (_, _, _, _, _, f) !!! _ = f
+
+instance HasAt (a, b, c, d, e, f) 5
 
 -- 7
 
@@ -435,6 +659,62 @@ instance HasLength (a, b, c, d, e, f, g)
 {-# COMPLETE Cons' :: (,,,,,,) #-}
 {-# COMPLETE Cons :: (,,,,,,) #-}
 
+type instance Reverse (a, b, c, d, e, f, g) = (g, f, e, d, c, b, a)
+
+instance HasReverse' (a, b, c, d, e, f, g) (g, f, e, d, c, b, a) where
+  reverse' (a, b, c, d, e, f, g) = (g, f, e, d, c, b, a)
+
+instance HasReverse (a, b, c, d, e, f, g)
+
+type instance (a, b, c, d, e, f, g) !! 0 = a
+
+instance HasAt' (a, b, c, d, e, f, g) 0 a where
+  (a, _, _, _, _, _, _) !!! _ = a
+
+instance HasAt (a, b, c, d, e, f, g) 0
+
+type instance (a, b, c, d, e, f, g) !! 1 = b
+
+instance HasAt' (a, b, c, d, e, f, g) 1 b where
+  (_, b, _, _, _, _, _) !!! _ = b
+
+instance HasAt (a, b, c, d, e, f, g) 1
+
+type instance (a, b, c, d, e, f, g) !! 2 = c
+
+instance HasAt' (a, b, c, d, e, f, g) 2 c where
+  (_, _, c, _, _, _, _) !!! _ = c
+
+instance HasAt (a, b, c, d, e, f, g) 2
+
+type instance (a, b, c, d, e, f, g) !! 3 = d
+
+instance HasAt' (a, b, c, d, e, f, g) 3 d where
+  (_, _, _, d, _, _, _) !!! _ = d
+
+instance HasAt (a, b, c, d, e, f, g) 3
+
+type instance (a, b, c, d, e, f, g) !! 4 = e
+
+instance HasAt' (a, b, c, d, e, f, g) 4 e where
+  (_, _, _, _, e, _, _) !!! _ = e
+
+instance HasAt (a, b, c, d, e, f, g) 4
+
+type instance (a, b, c, d, e, f, g) !! 5 = f
+
+instance HasAt' (a, b, c, d, e, f, g) 5 f where
+  (_, _, _, _, _, f, _) !!! _ = f
+
+instance HasAt (a, b, c, d, e, f, g) 5
+
+type instance (a, b, c, d, e, f, g) !! 6 = g
+
+instance HasAt' (a, b, c, d, e, f, g) 6 g where
+  (_, _, _, _, _, _, g) !!! _ = g
+
+instance HasAt (a, b, c, d, e, f, g) 6
+
 -- 8
 
 type instance Cons a (b, c, d, e, f, g, h) = (a, b, c, d, e, f, g, h)
@@ -478,6 +758,69 @@ instance HasLength (a, b, c, d, e, f, g, h)
 
 {-# COMPLETE Cons' :: (,,,,,,,) #-}
 {-# COMPLETE Cons :: (,,,,,,,) #-}
+
+type instance Reverse (a, b, c, d, e, f, g, h) = (h, g, f, e, d, c, b, a)
+
+instance HasReverse' (a, b, c, d, e, f, g, h) (h, g, f, e, d, c, b, a) where
+  reverse' (a, b, c, d, e, f, g, h) = (h, g, f, e, d, c, b, a)
+
+instance HasReverse (a, b, c, d, e, f, g, h)
+
+type instance (a, b, c, d, e, f, g, h) !! 0 = a
+
+instance HasAt' (a, b, c, d, e, f, g, h) 0 a where
+  (a, _, _, _, _, _, _, _) !!! _ = a
+
+instance HasAt (a, b, c, d, e, f, g, h) 0
+
+type instance (a, b, c, d, e, f, g, h) !! 1 = b
+
+instance HasAt' (a, b, c, d, e, f, g, h) 1 b where
+  (_, b, _, _, _, _, _, _) !!! _ = b
+
+instance HasAt (a, b, c, d, e, f, g, h) 1
+
+type instance (a, b, c, d, e, f, g, h) !! 2 = c
+
+instance HasAt' (a, b, c, d, e, f, g, h) 2 c where
+  (_, _, c, _, _, _, _, _) !!! _ = c
+
+instance HasAt (a, b, c, d, e, f, g, h) 2
+
+type instance (a, b, c, d, e, f, g, h) !! 3 = d
+
+instance HasAt' (a, b, c, d, e, f, g, h) 3 d where
+  (_, _, _, d, _, _, _, _) !!! _ = d
+
+instance HasAt (a, b, c, d, e, f, g, h) 3
+
+type instance (a, b, c, d, e, f, g, h) !! 4 = e
+
+instance HasAt' (a, b, c, d, e, f, g, h) 4 e where
+  (_, _, _, _, e, _, _, _) !!! _ = e
+
+instance HasAt (a, b, c, d, e, f, g, h) 4
+
+type instance (a, b, c, d, e, f, g, h) !! 5 = f
+
+instance HasAt' (a, b, c, d, e, f, g, h) 5 f where
+  (_, _, _, _, _, f, _, _) !!! _ = f
+
+instance HasAt (a, b, c, d, e, f, g, h) 5
+
+type instance (a, b, c, d, e, f, g, h) !! 6 = g
+
+instance HasAt' (a, b, c, d, e, f, g, h) 6 g where
+  (_, _, _, _, _, _, g, _) !!! _ = g
+
+instance HasAt (a, b, c, d, e, f, g, h) 6
+
+type instance (a, b, c, d, e, f, g, h) !! 7 = h
+
+instance HasAt' (a, b, c, d, e, f, g, h) 7 h where
+  (_, _, _, _, _, _, _, h) !!! _ = h
+
+instance HasAt (a, b, c, d, e, f, g, h) 7
 
 -- 9
 
@@ -523,6 +866,76 @@ instance HasLength (a, b, c, d, e, f, g, h, i)
 {-# COMPLETE Cons' :: (,,,,,,,,) #-}
 {-# COMPLETE Cons :: (,,,,,,,,) #-}
 
+type instance Reverse (a, b, c, d, e, f, g, h, i) = (i, h, g, f, e, d, c, b, a)
+
+instance HasReverse' (a, b, c, d, e, f, g, h, i) (i, h, g, f, e, d, c, b, a) where
+  reverse' (a, b, c, d, e, f, g, h, i) = (i, h, g, f, e, d, c, b, a)
+
+instance HasReverse (a, b, c, d, e, f, g, h, i)
+
+type instance (a, b, c, d, e, f, g, h, i) !! 0 = a
+
+instance HasAt' (a, b, c, d, e, f, g, h, i) 0 a where
+  (a, _, _, _, _, _, _, _, _) !!! _ = a
+
+instance HasAt (a, b, c, d, e, f, g, h, i) 0
+
+type instance (a, b, c, d, e, f, g, h, i) !! 1 = b
+
+instance HasAt' (a, b, c, d, e, f, g, h, i) 1 b where
+  (_, b, _, _, _, _, _, _, _) !!! _ = b
+
+instance HasAt (a, b, c, d, e, f, g, h, i) 1
+
+type instance (a, b, c, d, e, f, g, h, i) !! 2 = c
+
+instance HasAt' (a, b, c, d, e, f, g, h, i) 2 c where
+  (_, _, c, _, _, _, _, _, _) !!! _ = c
+
+instance HasAt (a, b, c, d, e, f, g, h, i) 2
+
+type instance (a, b, c, d, e, f, g, h, i) !! 3 = d
+
+instance HasAt' (a, b, c, d, e, f, g, h, i) 3 d where
+  (_, _, _, d, _, _, _, _, _) !!! _ = d
+
+instance HasAt (a, b, c, d, e, f, g, h, i) 3
+
+type instance (a, b, c, d, e, f, g, h, i) !! 4 = e
+
+instance HasAt' (a, b, c, d, e, f, g, h, i) 4 e where
+  (_, _, _, _, e, _, _, _, _) !!! _ = e
+
+instance HasAt (a, b, c, d, e, f, g, h, i) 4
+
+type instance (a, b, c, d, e, f, g, h, i) !! 5 = f
+
+instance HasAt' (a, b, c, d, e, f, g, h, i) 5 f where
+  (_, _, _, _, _, f, _, _, _) !!! _ = f
+
+instance HasAt (a, b, c, d, e, f, g, h, i) 5
+
+type instance (a, b, c, d, e, f, g, h, i) !! 6 = g
+
+instance HasAt' (a, b, c, d, e, f, g, h, i) 6 g where
+  (_, _, _, _, _, _, g, _, _) !!! _ = g
+
+instance HasAt (a, b, c, d, e, f, g, h, i) 6
+
+type instance (a, b, c, d, e, f, g, h, i) !! 7 = h
+
+instance HasAt' (a, b, c, d, e, f, g, h, i) 7 h where
+  (_, _, _, _, _, _, _, h, _) !!! _ = h
+
+instance HasAt (a, b, c, d, e, f, g, h, i) 7
+
+type instance (a, b, c, d, e, f, g, h, i) !! 8 = i
+
+instance HasAt' (a, b, c, d, e, f, g, h, i) 8 i where
+  (_, _, _, _, _, _, _, _, i) !!! _ = i
+
+instance HasAt (a, b, c, d, e, f, g, h, i) 8
+
 -- 10
 
 type instance Cons a (b, c, d, e, f, g, h, i, j) = (a, b, c, d, e, f, g, h, i, j)
@@ -566,6 +979,83 @@ instance HasLength (a, b, c, d, e, f, g, h, i, j)
 
 {-# COMPLETE Cons' :: (,,,,,,,,,) #-}
 {-# COMPLETE Cons :: (,,,,,,,,,) #-}
+
+type instance Reverse (a, b, c, d, e, f, g, h, i, j) = (j, i, h, g, f, e, d, c, b, a)
+
+instance HasReverse' (a, b, c, d, e, f, g, h, i, j) (j, i, h, g, f, e, d, c, b, a) where
+  reverse' (a, b, c, d, e, f, g, h, i, j) = (j, i, h, g, f, e, d, c, b, a)
+
+instance HasReverse (a, b, c, d, e, f, g, h, i, j)
+
+type instance (a, b, c, d, e, f, g, h, i, j) !! 0 = a
+
+instance HasAt' (a, b, c, d, e, f, g, h, i, j) 0 a where
+  (a, _, _, _, _, _, _, _, _, _) !!! _ = a
+
+instance HasAt (a, b, c, d, e, f, g, h, i, j) 0
+
+type instance (a, b, c, d, e, f, g, h, i, j) !! 1 = b
+
+instance HasAt' (a, b, c, d, e, f, g, h, i, j) 1 b where
+  (_, b, _, _, _, _, _, _, _, _) !!! _ = b
+
+instance HasAt (a, b, c, d, e, f, g, h, i, j) 1
+
+type instance (a, b, c, d, e, f, g, h, i, j) !! 2 = c
+
+instance HasAt' (a, b, c, d, e, f, g, h, i, j) 2 c where
+  (_, _, c, _, _, _, _, _, _, _) !!! _ = c
+
+instance HasAt (a, b, c, d, e, f, g, h, i, j) 2
+
+type instance (a, b, c, d, e, f, g, h, i, j) !! 3 = d
+
+instance HasAt' (a, b, c, d, e, f, g, h, i, j) 3 d where
+  (_, _, _, d, _, _, _, _, _, _) !!! _ = d
+
+instance HasAt (a, b, c, d, e, f, g, h, i, j) 3
+
+type instance (a, b, c, d, e, f, g, h, i, j) !! 4 = e
+
+instance HasAt' (a, b, c, d, e, f, g, h, i, j) 4 e where
+  (_, _, _, _, e, _, _, _, _, _) !!! _ = e
+
+instance HasAt (a, b, c, d, e, f, g, h, i, j) 4
+
+type instance (a, b, c, d, e, f, g, h, i, j) !! 5 = f
+
+instance HasAt' (a, b, c, d, e, f, g, h, i, j) 5 f where
+  (_, _, _, _, _, f, _, _, _, _) !!! _ = f
+
+instance HasAt (a, b, c, d, e, f, g, h, i, j) 5
+
+type instance (a, b, c, d, e, f, g, h, i, j) !! 6 = g
+
+instance HasAt' (a, b, c, d, e, f, g, h, i, j) 6 g where
+  (_, _, _, _, _, _, g, _, _, _) !!! _ = g
+
+instance HasAt (a, b, c, d, e, f, g, h, i, j) 6
+
+type instance (a, b, c, d, e, f, g, h, i, j) !! 7 = h
+
+instance HasAt' (a, b, c, d, e, f, g, h, i, j) 7 h where
+  (_, _, _, _, _, _, _, h, _, _) !!! _ = h
+
+instance HasAt (a, b, c, d, e, f, g, h, i, j) 7
+
+type instance (a, b, c, d, e, f, g, h, i, j) !! 8 = i
+
+instance HasAt' (a, b, c, d, e, f, g, h, i, j) 8 i where
+  (_, _, _, _, _, _, _, _, i, _) !!! _ = i
+
+instance HasAt (a, b, c, d, e, f, g, h, i, j) 8
+
+type instance (a, b, c, d, e, f, g, h, i, j) !! 9 = j
+
+instance HasAt' (a, b, c, d, e, f, g, h, i, j) 9 j where
+  (_, _, _, _, _, _, _, _, _, j) !!! _ = j
+
+instance HasAt (a, b, c, d, e, f, g, h, i, j) 9
 
 -- 11
 
@@ -611,6 +1101,90 @@ instance HasLength (a, b, c, d, e, f, g, h, i, j, k)
 {-# COMPLETE Cons' :: (,,,,,,,,,,) #-}
 {-# COMPLETE Cons :: (,,,,,,,,,,) #-}
 
+type instance Reverse (a, b, c, d, e, f, g, h, i, j, k) = (k, j, i, h, g, f, e, d, c, b, a)
+
+instance HasReverse' (a, b, c, d, e, f, g, h, i, j, k) (k, j, i, h, g, f, e, d, c, b, a) where
+  reverse' (a, b, c, d, e, f, g, h, i, j, k) = (k, j, i, h, g, f, e, d, c, b, a)
+
+instance HasReverse (a, b, c, d, e, f, g, h, i, j, k)
+
+type instance (a, b, c, d, e, f, g, h, i, j, k) !! 0 = a
+
+instance HasAt' (a, b, c, d, e, f, g, h, i, j, k) 0 a where
+  (a, _, _, _, _, _, _, _, _, _, _) !!! _ = a
+
+instance HasAt (a, b, c, d, e, f, g, h, i, j, k) 0
+
+type instance (a, b, c, d, e, f, g, h, i, j, k) !! 1 = b
+
+instance HasAt' (a, b, c, d, e, f, g, h, i, j, k) 1 b where
+  (_, b, _, _, _, _, _, _, _, _, _) !!! _ = b
+
+instance HasAt (a, b, c, d, e, f, g, h, i, j, k) 1
+
+type instance (a, b, c, d, e, f, g, h, i, j, k) !! 2 = c
+
+instance HasAt' (a, b, c, d, e, f, g, h, i, j, k) 2 c where
+  (_, _, c, _, _, _, _, _, _, _, _) !!! _ = c
+
+instance HasAt (a, b, c, d, e, f, g, h, i, j, k) 2
+
+type instance (a, b, c, d, e, f, g, h, i, j, k) !! 3 = d
+
+instance HasAt' (a, b, c, d, e, f, g, h, i, j, k) 3 d where
+  (_, _, _, d, _, _, _, _, _, _, _) !!! _ = d
+
+instance HasAt (a, b, c, d, e, f, g, h, i, j, k) 3
+
+type instance (a, b, c, d, e, f, g, h, i, j, k) !! 4 = e
+
+instance HasAt' (a, b, c, d, e, f, g, h, i, j, k) 4 e where
+  (_, _, _, _, e, _, _, _, _, _, _) !!! _ = e
+
+instance HasAt (a, b, c, d, e, f, g, h, i, j, k) 4
+
+type instance (a, b, c, d, e, f, g, h, i, j, k) !! 5 = f
+
+instance HasAt' (a, b, c, d, e, f, g, h, i, j, k) 5 f where
+  (_, _, _, _, _, f, _, _, _, _, _) !!! _ = f
+
+instance HasAt (a, b, c, d, e, f, g, h, i, j, k) 5
+
+type instance (a, b, c, d, e, f, g, h, i, j, k) !! 6 = g
+
+instance HasAt' (a, b, c, d, e, f, g, h, i, j, k) 6 g where
+  (_, _, _, _, _, _, g, _, _, _, _) !!! _ = g
+
+instance HasAt (a, b, c, d, e, f, g, h, i, j, k) 6
+
+type instance (a, b, c, d, e, f, g, h, i, j, k) !! 7 = h
+
+instance HasAt' (a, b, c, d, e, f, g, h, i, j, k) 7 h where
+  (_, _, _, _, _, _, _, h, _, _, _) !!! _ = h
+
+instance HasAt (a, b, c, d, e, f, g, h, i, j, k) 7
+
+type instance (a, b, c, d, e, f, g, h, i, j, k) !! 8 = i
+
+instance HasAt' (a, b, c, d, e, f, g, h, i, j, k) 8 i where
+  (_, _, _, _, _, _, _, _, i, _, _) !!! _ = i
+
+instance HasAt (a, b, c, d, e, f, g, h, i, j, k) 8
+
+type instance (a, b, c, d, e, f, g, h, i, j, k) !! 9 = j
+
+instance HasAt' (a, b, c, d, e, f, g, h, i, j, k) 9 j where
+  (_, _, _, _, _, _, _, _, _, j, _) !!! _ = j
+
+instance HasAt (a, b, c, d, e, f, g, h, i, j, k) 9
+
+type instance (a, b, c, d, e, f, g, h, i, j, k) !! 10 = k
+
+instance HasAt' (a, b, c, d, e, f, g, h, i, j, k) 10 k where
+  (_, _, _, _, _, _, _, _, _, _, k) !!! _ = k
+
+instance HasAt (a, b, c, d, e, f, g, h, i, j, k) 10
+
 -- 12
 
 type instance Cons a (b, c, d, e, f, g, h, i, j, k, l) = (a, b, c, d, e, f, g, h, i, j, k, l)
@@ -654,6 +1228,97 @@ instance HasLength (a, b, c, d, e, f, g, h, i, j, k, l)
 
 {-# COMPLETE Cons' :: (,,,,,,,,,,,) #-}
 {-# COMPLETE Cons :: (,,,,,,,,,,,) #-}
+
+type instance Reverse (a, b, c, d, e, f, g, h, i, j, k, l) = (l, k, j, i, h, g, f, e, d, c, b, a)
+
+instance HasReverse' (a, b, c, d, e, f, g, h, i, j, k, l) (l, k, j, i, h, g, f, e, d, c, b, a) where
+  reverse' (a, b, c, d, e, f, g, h, i, j, k, l) = (l, k, j, i, h, g, f, e, d, c, b, a)
+
+instance HasReverse (a, b, c, d, e, f, g, h, i, j, k, l)
+
+type instance (a, b, c, d, e, f, g, h, i, j, k, l) !! 0 = a
+
+instance HasAt' (a, b, c, d, e, f, g, h, i, j, k, l) 0 a where
+  (a, _, _, _, _, _, _, _, _, _, _, _) !!! _ = a
+
+instance HasAt (a, b, c, d, e, f, g, h, i, j, k, l) 0
+
+type instance (a, b, c, d, e, f, g, h, i, j, k, l) !! 1 = b
+
+instance HasAt' (a, b, c, d, e, f, g, h, i, j, k, l) 1 b where
+  (_, b, _, _, _, _, _, _, _, _, _, _) !!! _ = b
+
+instance HasAt (a, b, c, d, e, f, g, h, i, j, k, l) 1
+
+type instance (a, b, c, d, e, f, g, h, i, j, k, l) !! 2 = c
+
+instance HasAt' (a, b, c, d, e, f, g, h, i, j, k, l) 2 c where
+  (_, _, c, _, _, _, _, _, _, _, _, _) !!! _ = c
+
+instance HasAt (a, b, c, d, e, f, g, h, i, j, k, l) 2
+
+type instance (a, b, c, d, e, f, g, h, i, j, k, l) !! 3 = d
+
+instance HasAt' (a, b, c, d, e, f, g, h, i, j, k, l) 3 d where
+  (_, _, _, d, _, _, _, _, _, _, _, _) !!! _ = d
+
+instance HasAt (a, b, c, d, e, f, g, h, i, j, k, l) 3
+
+type instance (a, b, c, d, e, f, g, h, i, j, k, l) !! 4 = e
+
+instance HasAt' (a, b, c, d, e, f, g, h, i, j, k, l) 4 e where
+  (_, _, _, _, e, _, _, _, _, _, _, _) !!! _ = e
+
+instance HasAt (a, b, c, d, e, f, g, h, i, j, k, l) 4
+
+type instance (a, b, c, d, e, f, g, h, i, j, k, l) !! 5 = f
+
+instance HasAt' (a, b, c, d, e, f, g, h, i, j, k, l) 5 f where
+  (_, _, _, _, _, f, _, _, _, _, _, _) !!! _ = f
+
+instance HasAt (a, b, c, d, e, f, g, h, i, j, k, l) 5
+
+type instance (a, b, c, d, e, f, g, h, i, j, k, l) !! 6 = g
+
+instance HasAt' (a, b, c, d, e, f, g, h, i, j, k, l) 6 g where
+  (_, _, _, _, _, _, g, _, _, _, _, _) !!! _ = g
+
+instance HasAt (a, b, c, d, e, f, g, h, i, j, k, l) 6
+
+type instance (a, b, c, d, e, f, g, h, i, j, k, l) !! 7 = h
+
+instance HasAt' (a, b, c, d, e, f, g, h, i, j, k, l) 7 h where
+  (_, _, _, _, _, _, _, h, _, _, _, _) !!! _ = h
+
+instance HasAt (a, b, c, d, e, f, g, h, i, j, k, l) 7
+
+type instance (a, b, c, d, e, f, g, h, i, j, k, l) !! 8 = i
+
+instance HasAt' (a, b, c, d, e, f, g, h, i, j, k, l) 8 i where
+  (_, _, _, _, _, _, _, _, i, _, _, _) !!! _ = i
+
+instance HasAt (a, b, c, d, e, f, g, h, i, j, k, l) 8
+
+type instance (a, b, c, d, e, f, g, h, i, j, k, l) !! 9 = j
+
+instance HasAt' (a, b, c, d, e, f, g, h, i, j, k, l) 9 j where
+  (_, _, _, _, _, _, _, _, _, j, _, _) !!! _ = j
+
+instance HasAt (a, b, c, d, e, f, g, h, i, j, k, l) 9
+
+type instance (a, b, c, d, e, f, g, h, i, j, k, l) !! 10 = k
+
+instance HasAt' (a, b, c, d, e, f, g, h, i, j, k, l) 10 k where
+  (_, _, _, _, _, _, _, _, _, _, k, _) !!! _ = k
+
+instance HasAt (a, b, c, d, e, f, g, h, i, j, k, l) 10
+
+type instance (a, b, c, d, e, f, g, h, i, j, k, l) !! 11 = l
+
+instance HasAt' (a, b, c, d, e, f, g, h, i, j, k, l) 11 l where
+  (_, _, _, _, _, _, _, _, _, _, _, l) !!! _ = l
+
+instance HasAt (a, b, c, d, e, f, g, h, i, j, k, l) 11
 
 -- 13
 
@@ -699,6 +1364,104 @@ instance HasLength (a, b, c, d, e, f, g, h, i, j, k, l, m)
 {-# COMPLETE Cons' :: (,,,,,,,,,,,,) #-}
 {-# COMPLETE Cons :: (,,,,,,,,,,,,) #-}
 
+type instance Reverse (a, b, c, d, e, f, g, h, i, j, k, l, m) = (m, l, k, j, i, h, g, f, e, d, c, b, a)
+
+instance HasReverse' (a, b, c, d, e, f, g, h, i, j, k, l, m) (m, l, k, j, i, h, g, f, e, d, c, b, a) where
+  reverse' (a, b, c, d, e, f, g, h, i, j, k, l, m) = (m, l, k, j, i, h, g, f, e, d, c, b, a)
+
+instance HasReverse (a, b, c, d, e, f, g, h, i, j, k, l, m)
+
+type instance (a, b, c, d, e, f, g, h, i, j, k, l, m) !! 0 = a
+
+instance HasAt' (a, b, c, d, e, f, g, h, i, j, k, l, m) 0 a where
+  (a, _, _, _, _, _, _, _, _, _, _, _, _) !!! _ = a
+
+instance HasAt (a, b, c, d, e, f, g, h, i, j, k, l, m) 0
+
+type instance (a, b, c, d, e, f, g, h, i, j, k, l, m) !! 1 = b
+
+instance HasAt' (a, b, c, d, e, f, g, h, i, j, k, l, m) 1 b where
+  (_, b, _, _, _, _, _, _, _, _, _, _, _) !!! _ = b
+
+instance HasAt (a, b, c, d, e, f, g, h, i, j, k, l, m) 1
+
+type instance (a, b, c, d, e, f, g, h, i, j, k, l, m) !! 2 = c
+
+instance HasAt' (a, b, c, d, e, f, g, h, i, j, k, l, m) 2 c where
+  (_, _, c, _, _, _, _, _, _, _, _, _, _) !!! _ = c
+
+instance HasAt (a, b, c, d, e, f, g, h, i, j, k, l, m) 2
+
+type instance (a, b, c, d, e, f, g, h, i, j, k, l, m) !! 3 = d
+
+instance HasAt' (a, b, c, d, e, f, g, h, i, j, k, l, m) 3 d where
+  (_, _, _, d, _, _, _, _, _, _, _, _, _) !!! _ = d
+
+instance HasAt (a, b, c, d, e, f, g, h, i, j, k, l, m) 3
+
+type instance (a, b, c, d, e, f, g, h, i, j, k, l, m) !! 4 = e
+
+instance HasAt' (a, b, c, d, e, f, g, h, i, j, k, l, m) 4 e where
+  (_, _, _, _, e, _, _, _, _, _, _, _, _) !!! _ = e
+
+instance HasAt (a, b, c, d, e, f, g, h, i, j, k, l, m) 4
+
+type instance (a, b, c, d, e, f, g, h, i, j, k, l, m) !! 5 = f
+
+instance HasAt' (a, b, c, d, e, f, g, h, i, j, k, l, m) 5 f where
+  (_, _, _, _, _, f, _, _, _, _, _, _, _) !!! _ = f
+
+instance HasAt (a, b, c, d, e, f, g, h, i, j, k, l, m) 5
+
+type instance (a, b, c, d, e, f, g, h, i, j, k, l, m) !! 6 = g
+
+instance HasAt' (a, b, c, d, e, f, g, h, i, j, k, l, m) 6 g where
+  (_, _, _, _, _, _, g, _, _, _, _, _, _) !!! _ = g
+
+instance HasAt (a, b, c, d, e, f, g, h, i, j, k, l, m) 6
+
+type instance (a, b, c, d, e, f, g, h, i, j, k, l, m) !! 7 = h
+
+instance HasAt' (a, b, c, d, e, f, g, h, i, j, k, l, m) 7 h where
+  (_, _, _, _, _, _, _, h, _, _, _, _, _) !!! _ = h
+
+instance HasAt (a, b, c, d, e, f, g, h, i, j, k, l, m) 7
+
+type instance (a, b, c, d, e, f, g, h, i, j, k, l, m) !! 8 = i
+
+instance HasAt' (a, b, c, d, e, f, g, h, i, j, k, l, m) 8 i where
+  (_, _, _, _, _, _, _, _, i, _, _, _, _) !!! _ = i
+
+instance HasAt (a, b, c, d, e, f, g, h, i, j, k, l, m) 8
+
+type instance (a, b, c, d, e, f, g, h, i, j, k, l, m) !! 9 = j
+
+instance HasAt' (a, b, c, d, e, f, g, h, i, j, k, l, m) 9 j where
+  (_, _, _, _, _, _, _, _, _, j, _, _, _) !!! _ = j
+
+instance HasAt (a, b, c, d, e, f, g, h, i, j, k, l, m) 9
+
+type instance (a, b, c, d, e, f, g, h, i, j, k, l, m) !! 10 = k
+
+instance HasAt' (a, b, c, d, e, f, g, h, i, j, k, l, m) 10 k where
+  (_, _, _, _, _, _, _, _, _, _, k, _, _) !!! _ = k
+
+instance HasAt (a, b, c, d, e, f, g, h, i, j, k, l, m) 10
+
+type instance (a, b, c, d, e, f, g, h, i, j, k, l, m) !! 11 = l
+
+instance HasAt' (a, b, c, d, e, f, g, h, i, j, k, l, m) 11 l where
+  (_, _, _, _, _, _, _, _, _, _, _, l, _) !!! _ = l
+
+instance HasAt (a, b, c, d, e, f, g, h, i, j, k, l, m) 11
+
+type instance (a, b, c, d, e, f, g, h, i, j, k, l, m) !! 12 = m
+
+instance HasAt' (a, b, c, d, e, f, g, h, i, j, k, l, m) 12 m where
+  (_, _, _, _, _, _, _, _, _, _, _, _, m) !!! _ = m
+
+instance HasAt (a, b, c, d, e, f, g, h, i, j, k, l, m) 12
+
 -- 14
 
 type instance Cons a (b, c, d, e, f, g, h, i, j, k, l, m, n) = (a, b, c, d, e, f, g, h, i, j, k, l, m, n)
@@ -743,6 +1506,111 @@ instance HasLength (a, b, c, d, e, f, g, h, i, j, k, l, m, n)
 {-# COMPLETE Cons' :: (,,,,,,,,,,,,,) #-}
 {-# COMPLETE Cons :: (,,,,,,,,,,,,,) #-}
 
+type instance Reverse (a, b, c, d, e, f, g, h, i, j, k, l, m, n) = (n, m, l, k, j, i, h, g, f, e, d, c, b, a)
+
+instance HasReverse' (a, b, c, d, e, f, g, h, i, j, k, l, m, n) (n, m, l, k, j, i, h, g, f, e, d, c, b, a) where
+  reverse' (a, b, c, d, e, f, g, h, i, j, k, l, m, n) = (n, m, l, k, j, i, h, g, f, e, d, c, b, a)
+
+instance HasReverse (a, b, c, d, e, f, g, h, i, j, k, l, m, n)
+
+type instance (a, b, c, d, e, f, g, h, i, j, k, l, m, n) !! 0 = a
+
+instance HasAt' (a, b, c, d, e, f, g, h, i, j, k, l, m, n) 0 a where
+  (a, _, _, _, _, _, _, _, _, _, _, _, _, _) !!! _ = a
+
+instance HasAt (a, b, c, d, e, f, g, h, i, j, k, l, m, n) 0
+
+type instance (a, b, c, d, e, f, g, h, i, j, k, l, m, n) !! 1 = b
+
+instance HasAt' (a, b, c, d, e, f, g, h, i, j, k, l, m, n) 1 b where
+  (_, b, _, _, _, _, _, _, _, _, _, _, _, _) !!! _ = b
+
+instance HasAt (a, b, c, d, e, f, g, h, i, j, k, l, m, n) 1
+
+type instance (a, b, c, d, e, f, g, h, i, j, k, l, m, n) !! 2 = c
+
+instance HasAt' (a, b, c, d, e, f, g, h, i, j, k, l, m, n) 2 c where
+  (_, _, c, _, _, _, _, _, _, _, _, _, _, _) !!! _ = c
+
+instance HasAt (a, b, c, d, e, f, g, h, i, j, k, l, m, n) 2
+
+type instance (a, b, c, d, e, f, g, h, i, j, k, l, m, n) !! 3 = d
+
+instance HasAt' (a, b, c, d, e, f, g, h, i, j, k, l, m, n) 3 d where
+  (_, _, _, d, _, _, _, _, _, _, _, _, _, _) !!! _ = d
+
+instance HasAt (a, b, c, d, e, f, g, h, i, j, k, l, m, n) 3
+
+type instance (a, b, c, d, e, f, g, h, i, j, k, l, m, n) !! 4 = e
+
+instance HasAt' (a, b, c, d, e, f, g, h, i, j, k, l, m, n) 4 e where
+  (_, _, _, _, e, _, _, _, _, _, _, _, _, _) !!! _ = e
+
+instance HasAt (a, b, c, d, e, f, g, h, i, j, k, l, m, n) 4
+
+type instance (a, b, c, d, e, f, g, h, i, j, k, l, m, n) !! 5 = f
+
+instance HasAt' (a, b, c, d, e, f, g, h, i, j, k, l, m, n) 5 f where
+  (_, _, _, _, _, f, _, _, _, _, _, _, _, _) !!! _ = f
+
+instance HasAt (a, b, c, d, e, f, g, h, i, j, k, l, m, n) 5
+
+type instance (a, b, c, d, e, f, g, h, i, j, k, l, m, n) !! 6 = g
+
+instance HasAt' (a, b, c, d, e, f, g, h, i, j, k, l, m, n) 6 g where
+  (_, _, _, _, _, _, g, _, _, _, _, _, _, _) !!! _ = g
+
+instance HasAt (a, b, c, d, e, f, g, h, i, j, k, l, m, n) 6
+
+type instance (a, b, c, d, e, f, g, h, i, j, k, l, m, n) !! 7 = h
+
+instance HasAt' (a, b, c, d, e, f, g, h, i, j, k, l, m, n) 7 h where
+  (_, _, _, _, _, _, _, h, _, _, _, _, _, _) !!! _ = h
+
+instance HasAt (a, b, c, d, e, f, g, h, i, j, k, l, m, n) 7
+
+type instance (a, b, c, d, e, f, g, h, i, j, k, l, m, n) !! 8 = i
+
+instance HasAt' (a, b, c, d, e, f, g, h, i, j, k, l, m, n) 8 i where
+  (_, _, _, _, _, _, _, _, i, _, _, _, _, _) !!! _ = i
+
+instance HasAt (a, b, c, d, e, f, g, h, i, j, k, l, m, n) 8
+
+type instance (a, b, c, d, e, f, g, h, i, j, k, l, m, n) !! 9 = j
+
+instance HasAt' (a, b, c, d, e, f, g, h, i, j, k, l, m, n) 9 j where
+  (_, _, _, _, _, _, _, _, _, j, _, _, _, _) !!! _ = j
+
+instance HasAt (a, b, c, d, e, f, g, h, i, j, k, l, m, n) 9
+
+type instance (a, b, c, d, e, f, g, h, i, j, k, l, m, n) !! 10 = k
+
+instance HasAt' (a, b, c, d, e, f, g, h, i, j, k, l, m, n) 10 k where
+  (_, _, _, _, _, _, _, _, _, _, k, _, _, _) !!! _ = k
+
+instance HasAt (a, b, c, d, e, f, g, h, i, j, k, l, m, n) 10
+
+type instance (a, b, c, d, e, f, g, h, i, j, k, l, m, n) !! 11 = l
+
+instance HasAt' (a, b, c, d, e, f, g, h, i, j, k, l, m, n) 11 l where
+  (_, _, _, _, _, _, _, _, _, _, _, l, _, _) !!! _ = l
+
+instance HasAt (a, b, c, d, e, f, g, h, i, j, k, l, m, n) 11
+
+type instance (a, b, c, d, e, f, g, h, i, j, k, l, m, n) !! 12 = m
+
+instance HasAt' (a, b, c, d, e, f, g, h, i, j, k, l, m, n) 12 m where
+  (_, _, _, _, _, _, _, _, _, _, _, _, m, _) !!! _ = m
+
+instance HasAt (a, b, c, d, e, f, g, h, i, j, k, l, m, n) 12
+
+type instance (a, b, c, d, e, f, g, h, i, j, k, l, m, n) !! 13 = n
+
+instance HasAt' (a, b, c, d, e, f, g, h, i, j, k, l, m, n) 13 n where
+  (_, _, _, _, _, _, _, _, _, _, _, _, _, n) !!! _ = n
+
+instance HasAt (a, b, c, d, e, f, g, h, i, j, k, l, m, n) 13
+
 -- 15
 
 type instance Cons a (b, c, d, e, f, g, h, i, j, k, l, m, n, o) = (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o)
@@ -786,3 +1654,115 @@ instance HasLength (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o)
 
 {-# COMPLETE Cons' :: (,,,,,,,,,,,,,,) #-}
 {-# COMPLETE Cons :: (,,,,,,,,,,,,,,) #-}
+
+type instance Reverse (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o) = (o, n, m, l, k, j, i, h, g, f, e, d, c, b, a)
+
+instance HasReverse' (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o) (o, n, m, l, k, j, i, h, g, f, e, d, c, b, a) where
+  reverse' (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o) = (o, n, m, l, k, j, i, h, g, f, e, d, c, b, a)
+
+instance HasReverse (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o)
+
+type instance (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o) !! 0 = a
+
+instance HasAt' (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o) 0 a where
+  (a, _, _, _, _, _, _, _, _, _, _, _, _, _, _) !!! _ = a
+
+instance HasAt (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o) 0
+
+type instance (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o) !! 1 = b
+
+instance HasAt' (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o) 1 b where
+  (_, b, _, _, _, _, _, _, _, _, _, _, _, _, _) !!! _ = b
+
+instance HasAt (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o) 1
+
+type instance (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o) !! 2 = c
+
+instance HasAt' (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o) 2 c where
+  (_, _, c, _, _, _, _, _, _, _, _, _, _, _, _) !!! _ = c
+
+instance HasAt (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o) 2
+
+type instance (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o) !! 3 = d
+
+instance HasAt' (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o) 3 d where
+  (_, _, _, d, _, _, _, _, _, _, _, _, _, _, _) !!! _ = d
+
+instance HasAt (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o) 3
+
+type instance (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o) !! 4 = e
+
+instance HasAt' (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o) 4 e where
+  (_, _, _, _, e, _, _, _, _, _, _, _, _, _, _) !!! _ = e
+
+instance HasAt (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o) 4
+
+type instance (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o) !! 5 = f
+
+instance HasAt' (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o) 5 f where
+  (_, _, _, _, _, f, _, _, _, _, _, _, _, _, _) !!! _ = f
+
+instance HasAt (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o) 5
+
+type instance (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o) !! 6 = g
+
+instance HasAt' (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o) 6 g where
+  (_, _, _, _, _, _, g, _, _, _, _, _, _, _, _) !!! _ = g
+
+instance HasAt (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o) 6
+
+type instance (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o) !! 7 = h
+
+instance HasAt' (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o) 7 h where
+  (_, _, _, _, _, _, _, h, _, _, _, _, _, _, _) !!! _ = h
+
+instance HasAt (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o) 7
+
+type instance (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o) !! 8 = i
+
+instance HasAt' (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o) 8 i where
+  (_, _, _, _, _, _, _, _, i, _, _, _, _, _, _) !!! _ = i
+
+instance HasAt (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o) 8
+
+type instance (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o) !! 9 = j
+
+instance HasAt' (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o) 9 j where
+  (_, _, _, _, _, _, _, _, _, j, _, _, _, _, _) !!! _ = j
+
+instance HasAt (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o) 9
+
+type instance (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o) !! 10 = k
+
+instance HasAt' (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o) 10 k where
+  (_, _, _, _, _, _, _, _, _, _, k, _, _, _, _) !!! _ = k
+
+instance HasAt (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o) 10
+
+type instance (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o) !! 11 = l
+
+instance HasAt' (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o) 11 l where
+  (_, _, _, _, _, _, _, _, _, _, _, l, _, _, _) !!! _ = l
+
+instance HasAt (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o) 11
+
+type instance (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o) !! 12 = m
+
+instance HasAt' (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o) 12 m where
+  (_, _, _, _, _, _, _, _, _, _, _, _, m, _, _) !!! _ = m
+
+instance HasAt (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o) 12
+
+type instance (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o) !! 13 = n
+
+instance HasAt' (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o) 13 n where
+  (_, _, _, _, _, _, _, _, _, _, _, _, _, n, _) !!! _ = n
+
+instance HasAt (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o) 13
+
+type instance (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o) !! 14 = o
+
+instance HasAt' (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o) 14 o where
+  (_, _, _, _, _, _, _, _, _, _, _, _, _, _, o) !!! _ = o
+
+instance HasAt (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o) 14

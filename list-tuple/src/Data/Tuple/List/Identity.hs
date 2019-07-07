@@ -22,9 +22,10 @@ module Data.Tuple.List.Identity () where
 import           Prelude               ()
 
 import           Data.Functor.Identity (Identity)
-import           Data.Tuple.List       (Cons, HasCons, HasHead, HasInit,
-                                        HasLast, HasLength, HasTail, HasUncons,
-                                        Head, Init, Last, Length, Tail)
+import           Data.Tuple.List       (type (!!), Cons, HasAt, HasCons,
+                                        HasHead, HasInit, HasLast, HasLength,
+                                        HasReverse, HasTail, HasUncons, Head,
+                                        Init, Last, Length, Reverse, Tail)
 
 -- 1
 
@@ -48,6 +49,14 @@ instance HasCons a ()
 instance HasUncons (Identity a)
 
 instance HasLength (Identity a)
+
+type instance Reverse (Identity a) = Identity a
+
+instance HasReverse (Identity a)
+
+type instance (Identity a) !! 0 = a
+
+instance HasAt (Identity a) 0
 
 -- 2
 

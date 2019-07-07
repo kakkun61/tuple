@@ -21,9 +21,10 @@ module Data.Tuple.List.OneTuple () where
 
 import           Prelude             ()
 
-import           Data.Tuple.List     (Cons, HasCons, HasHead, HasInit, HasLast,
-                                      HasLength, HasTail, HasUncons, Head, Init,
-                                      Last, Length, Tail)
+import           Data.Tuple.List     (type (!!), Cons, HasAt, HasCons, HasHead,
+                                      HasInit, HasLast, HasLength, HasReverse,
+                                      HasTail, HasUncons, Head, Init, Last,
+                                      Length, Reverse, Tail)
 import           Data.Tuple.OneTuple (OneTuple)
 
 -- 1
@@ -48,6 +49,14 @@ instance HasCons a ()
 instance HasUncons (OneTuple a)
 
 instance HasLength (OneTuple a)
+
+type instance Reverse (OneTuple a) = OneTuple a
+
+instance HasReverse (OneTuple a)
+
+type instance (OneTuple a) !! 0 = a
+
+instance HasAt (OneTuple a) 0
 
 -- 2
 

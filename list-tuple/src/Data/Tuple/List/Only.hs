@@ -21,9 +21,10 @@ module Data.Tuple.List.Only () where
 
 import           Prelude         ()
 
-import           Data.Tuple.List (Cons, HasCons, HasHead, HasInit, HasLast,
-                                  HasLength, HasTail, HasUncons, Head, Init,
-                                  Last, Length, Tail)
+import           Data.Tuple.List (type (!!), Cons, HasAt, HasCons, HasHead,
+                                  HasInit, HasLast, HasLength, HasReverse,
+                                  HasTail, HasUncons, Head, Init, Last, Length,
+                                  Reverse, Tail)
 import           Data.Tuple.Only (Only)
 
 -- 1
@@ -48,6 +49,14 @@ instance HasCons a ()
 instance HasUncons (Only a)
 
 instance HasLength (Only a)
+
+type instance Reverse (Only a) = Only a
+
+instance HasReverse (Only a)
+
+type instance (Only a) !! 0 = a
+
+instance HasAt (Only a) 0
 
 -- 2
 

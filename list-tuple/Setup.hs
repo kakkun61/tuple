@@ -1,23 +1,28 @@
 import           Prelude                            hiding (head, init, last,
-                                                     tail)
+                                                     reverse, tail)
 import qualified Prelude
 
 import           Data.Char                          (isDigit)
 import           Data.Foldable                      (for_)
-import           Data.List                          (intercalate, isPrefixOf,
-                                                     replicate, stripPrefix)
+import           Data.List                          (intercalate, intersperse,
+                                                     isPrefixOf, replicate,
+                                                     stripPrefix)
 import           Distribution.Simple                (Args, UserHooks (preBuild),
                                                      defaultMainWithHooks,
                                                      simpleUserHooks)
 import           Distribution.Simple.Setup          (BuildFlags)
 import           Distribution.Types.HookedBuildInfo (HookedBuildInfo,
                                                      emptyHookedBuildInfo)
-import           System.Directory                   (copyFile, removeFile)
+import           System.Directory                   (copyFile,
+                                                     createDirectoryIfMissing,
+                                                     getTemporaryDirectory,
+                                                     removeFile)
 import           System.IO                          (Handle, IOMode (ReadMode),
                                                      hClose, hGetLine, hIsEOF,
                                                      hPutStrLn, hSetNewlineMode,
                                                      noNewlineTranslation,
-                                                     openTempFile, withFile)
+                                                     openTempFile, stdin,
+                                                     withFile)
 
 main :: IO ()
 main =
@@ -31,20 +36,28 @@ preProcessListTuple _ _ = do
     dir = "src/Data/Tuple"
     file = "List.hs"
     srcPath = dir ++ "/" ++ file
+    templatePath = "template/List.hs"
+    templateAtPath = "template/ListAt.hs"
   tempPath <-
     withFile srcPath ReadMode $ \src -> do
-      (tempPath, temp) <- openTempFile dir file
+      tempDir <- (++ "list-tuple") <$> getTemporaryDirectory
+      createDirectoryIfMissing True tempDir
+      (tempPath, temp) <- openTempFile tempDir file
+      putStrLn $ "temporaly file: " ++ tempPath
       hSetNewlineMode src noNewlineTranslation
       hSetNewlineMode temp noNewlineTranslation
-      loop src temp
+      hSetNewlineMode stdin noNewlineTranslation
+      template <- lines <$> readFile templatePath
+      templateAt <- lines <$> readFile templateAtPath
+      loop src temp template templateAt
       hClose temp
       pure tempPath
   copyFile tempPath srcPath
   removeFile tempPath
   pure emptyHookedBuildInfo
   where
-    loop :: Handle -> Handle -> IO ()
-    loop src temp =
+    loop :: Handle -> Handle -> [String] -> [String] -> IO ()
+    loop src temp template templateAt =
       go
       where
         go = do
@@ -53,36 +66,40 @@ preProcessListTuple _ _ = do
             then pure ()
             else do
               line <- hGetLine src
-              for_ (preprocess line) (hPutStrLn temp)
-              loop src temp
+              for_ (preprocess line template templateAt) (hPutStrLn temp)
+              go
 
-    preprocess :: String -> [String]
-    preprocess t
-      | Just rest <- stripPrefix "---- embed " t
+    preprocess :: String -> [String] -> [String] -> [String]
+    preprocess line template templateAt
+      | Just rest <- stripPrefix "---- embed " line
       , let n = read $ takeWhile isDigit rest
-      = embed n template
-      | otherwise = [t]
+      = embed n template templateAt
+      | otherwise = [line]
 
-    embed :: Word -> [String] -> [String]
-    embed l t
-      | l >= 3 = go <$> t
+    embed :: Word -> [String] -> [String] -> [String]
+    embed l template templateAt
+      | l >= 3 = concatMap go template
       | otherwise = error "length must be larger than or equal to 3"
       where
-        go "" = ""
+        go "" = [""]
         go t
-          | Just rest <- stripPrefix "<tuple>" t = tuple ++ go rest
-          | Just rest <- stripPrefix "<cons>" t = cons ++ go rest
-          | Just rest <- stripPrefix "<tail>" t = tail ++ go rest
-          | Just rest <- stripPrefix "<init>" t = init ++ go rest
-          | Just rest <- stripPrefix "<last>" t = last ++ go rest
-          | Just rest <- stripPrefix "<length>" t = length ++ go rest
-          | Just rest <- stripPrefix "<tuple-head>" t = tupleHead ++ go rest
-          | Just rest <- stripPrefix "<tuple-tail>" t = tupleTail ++ go rest
-          | Just rest <- stripPrefix "<tuple-init>" t = tupleInit ++ go rest
-          | Just rest <- stripPrefix "<tuple-last>" t = tupleLast ++ go rest
-          | Just rest <- stripPrefix "<cons>" t = cons ++ go rest
+          | Just rest <- stripPrefix "<tuple>" t = [tuple ++ Prelude.head (go rest)]
+          | Just rest <- stripPrefix "<cons>" t = [cons ++ Prelude.head (go rest)]
+          | Just rest <- stripPrefix "<tail>" t = [tail ++ Prelude.head (go rest)]
+          | Just rest <- stripPrefix "<init>" t = [init ++ Prelude.head (go rest)]
+          | Just rest <- stripPrefix "<last>" t = [last ++ Prelude.head (go rest)]
+          | Just rest <- stripPrefix "<length>" t = [length ++ Prelude.head (go rest)]
+          | Just rest <- stripPrefix "<tuple-head>" t = [tupleHead ++ Prelude.head (go rest)]
+          | Just rest <- stripPrefix "<tuple-tail>" t = [tupleTail ++ Prelude.head (go rest)]
+          | Just rest <- stripPrefix "<tuple-init>" t = [tupleInit ++ Prelude.head (go rest)]
+          | Just rest <- stripPrefix "<tuple-last>" t = [tupleLast ++ Prelude.head (go rest)]
+          | Just rest <- stripPrefix "<cons>" t = [cons ++ Prelude.head (go rest)]
+          | Just rest <- stripPrefix "<reverse>" t = [reverse ++ Prelude.head (go rest)]
           | Just rest <- stripPrefix "<" t = error $ "unknown tag: " ++ takeWhile (/= '>') rest
-          | (s, rest) <- span (/= '<') t = s ++ go rest
+          | Just _ <- stripPrefix "---- has-at" t
+          = concatMap go $ concat $ intersperse [""] $ embedAt <$> [0 .. l - 1]
+          | Just rest <- stripPrefix "-" t = ["-" ++ Prelude.head (go rest)]
+          | (s, rest) <- span ((&&) <$> (/= '<') <*> (/= '-')) t = [s ++ Prelude.head (go rest)]
         n = fromIntegral l
         m = n - 1
         tuple = paren $ take n abc
@@ -92,57 +109,28 @@ preProcessListTuple _ _ = do
         length = show l
         tupleHead = paren $ take n $ 'a' : unders
         tupleTail = paren $ take n $ '_' : Prelude.tail abc
-        tupleInit = paren $ reverse $ '_' : reverse (take m abc)
-        tupleLast = paren $ reverse $ take n $ last' : unders
+        tupleInit = paren $ Prelude.reverse $ '_' : zy
+        tupleLast = paren $ Prelude.reverse $ take n $ last' : unders
         cons = "(" ++ replicate m ',' ++ ")"
         paren xs = "(" ++ intercalate ", " ((: []) <$> xs) ++ ")"
         abc = ['a' ..]
         unders = repeat '_'
         last' = abc !! m
+        zy = Prelude.reverse (take m abc)
+        zyx = Prelude.reverse (take n abc)
+        reverse = paren $ zyx
 
-    template :: [String]
-    template =
-      [ "-- <length>"
-      , ""
-      , "type instance Cons a <tail> = <tuple>"
-      , "type instance Head <tuple> = a"
-      , "type instance Tail <tuple> = <tail>"
-      , "type instance Init <tuple> = <init>"
-      , "type instance Last <tuple> = <last>"
-      , "type instance Length <tuple> = <length>"
-      , ""
-      , "instance HasHead' <tuple> a where"
-      , "  head' <tuple-head> = a"
-      , ""
-      , "instance HasTail' <tuple> <tail> where"
-      , "  tail' <tuple-tail> = <tail>"
-      , ""
-      , "instance HasInit' <tuple> <init> where"
-      , "  init' <tuple-init> = <init>"
-      , ""
-      , "instance HasLast' <tuple> <last> where"
-      , "  last' <tuple-last> = <last>"
-      , ""
-      , "instance HasCons' <tuple> a <tail> where"
-      , "  cons' a <tail> = <tuple>"
-      , ""
-      , "instance HasUncons' <tuple> a <tail> where"
-      , "  uncons' <tuple> = (a, <tail>)"
-      , ""
-      , "instance HasHead <tuple>"
-      , ""
-      , "instance HasTail <tuple>"
-      , ""
-      , "instance HasInit <tuple>"
-      , ""
-      , "instance HasLast <tuple>"
-      , ""
-      , "instance HasCons a <tail>"
-      , ""
-      , "instance HasUncons <tuple>"
-      , ""
-      , "instance HasLength <tuple>"
-      , ""
-      , "{-# COMPLETE Cons' :: <cons> #-}"
-      , "{-# COMPLETE Cons :: <cons> #-}"
-      ]
+        embedAt :: Word -> [String]
+        embedAt at =
+          go <$> templateAt
+          where
+            go "" = ""
+            go t
+              | Just rest <- stripPrefix "<at>" t = show at ++ go rest
+              | Just rest <- stripPrefix "<item>" t = item ++ go rest
+              | Just rest <- stripPrefix "<tuple-at>" t = tupleAt ++ go rest
+              | Just rest <- stripPrefix "<" t = "<" ++ go rest
+              | (s, rest) <- span (/= '<') t = s ++ go rest
+            at' = fromIntegral at
+            item = [abc !! at']
+            tupleAt = paren $ take at' unders ++ item ++ take (n - at' - 1) unders
