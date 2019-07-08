@@ -1,28 +1,15 @@
-import           Prelude                            hiding (head, init, last,
-                                                     reverse, tail)
+import           Prelude hiding (head, init, last, reverse, tail)
 import qualified Prelude
 
-import           Data.Char                          (isDigit)
-import           Data.Foldable                      (for_)
-import           Data.List                          (intercalate, intersperse,
-                                                     isPrefixOf, replicate,
-                                                     stripPrefix)
-import           Distribution.Simple                (Args, UserHooks (preBuild),
-                                                     defaultMainWithHooks,
-                                                     simpleUserHooks)
-import           Distribution.Simple.Setup          (BuildFlags)
-import           Distribution.Types.HookedBuildInfo (HookedBuildInfo,
-                                                     emptyHookedBuildInfo)
-import           System.Directory                   (copyFile,
-                                                     createDirectoryIfMissing,
-                                                     getTemporaryDirectory,
-                                                     removeFile)
-import           System.IO                          (Handle, IOMode (ReadMode),
-                                                     hClose, hGetLine, hIsEOF,
-                                                     hPutStrLn, hSetNewlineMode,
-                                                     noNewlineTranslation,
-                                                     openTempFile, stdin,
-                                                     withFile)
+import Data.Char                          (isDigit)
+import Data.Foldable                      (for_)
+import Data.List                          (intercalate, intersperse, isPrefixOf, replicate, stripPrefix)
+import Distribution.Simple                (Args, UserHooks (preBuild), defaultMainWithHooks, simpleUserHooks)
+import Distribution.Simple.Setup          (BuildFlags)
+import Distribution.Types.HookedBuildInfo (HookedBuildInfo, emptyHookedBuildInfo)
+import System.Directory                   (copyFile, createDirectoryIfMissing, getTemporaryDirectory, removeFile)
+import System.IO                          (Handle, IOMode (ReadMode), hClose, hGetLine, hIsEOF, hPutStrLn,
+                                           hSetNewlineMode, noNewlineTranslation, openTempFile, stdin, withFile)
 
 main :: IO ()
 main =

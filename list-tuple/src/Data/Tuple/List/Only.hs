@@ -19,13 +19,11 @@
 
 module Data.Tuple.List.Only () where
 
-import           Prelude         ()
+import Prelude ()
 
-import           Data.Tuple.List (type (!!), Cons, HasAt, HasCons, HasHead,
-                                  HasInit, HasLast, HasLength, HasReverse,
-                                  HasTail, HasUncons, Head, Init, Last, Length,
-                                  Reverse, Tail)
-import           Data.Tuple.Only (Only)
+import Data.Tuple.List (type (!!), Cons, HasAt, HasCons, HasHead, HasInit, HasLast, HasLength, HasReverse, HasTail,
+                        HasUncons, Head, Init, Last, Length, Reverse, Tail)
+import Data.Tuple.Only (Only)
 
 -- 1
 

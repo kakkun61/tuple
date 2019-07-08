@@ -18,9 +18,9 @@ module Data.Tuple.Single
   , pattern Single
   ) where
 
-import           Data.Functor.Identity (Identity (Identity, runIdentity))
-import           Data.Tuple.OneTuple   (OneTuple (OneTuple), only)
-import           Data.Tuple.Only       (Only (Only, fromOnly))
+import Data.Functor.Identity (Identity (Identity, runIdentity))
+import Data.Tuple.OneTuple   (OneTuple (OneTuple), only)
+import Data.Tuple.Only       (Only (Only, fromOnly))
 
 class Single t where
   wrap :: a -> t a

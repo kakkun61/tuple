@@ -19,13 +19,11 @@
 
 module Data.Tuple.List.Identity () where
 
-import           Prelude               ()
+import Prelude ()
 
-import           Data.Functor.Identity (Identity)
-import           Data.Tuple.List       (type (!!), Cons, HasAt, HasCons,
-                                        HasHead, HasInit, HasLast, HasLength,
-                                        HasReverse, HasTail, HasUncons, Head,
-                                        Init, Last, Length, Reverse, Tail)
+import Data.Functor.Identity (Identity)
+import Data.Tuple.List       (type (!!), Cons, HasAt, HasCons, HasHead, HasInit, HasLast, HasLength, HasReverse,
+                              HasTail, HasUncons, Head, Init, Last, Length, Reverse, Tail)
 
 -- 1
 

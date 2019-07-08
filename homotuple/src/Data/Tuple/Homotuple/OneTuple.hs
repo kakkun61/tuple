@@ -17,9 +17,9 @@
 
 module Data.Tuple.Homotuple.OneTuple () where
 
-import           Data.Tuple.Homotuple (Homotuple, errorLengthMismatch)
-import           Data.Tuple.OneTuple  (OneTuple (OneTuple))
-import           GHC.Exts             (IsList (Item, fromList, toList))
+import Data.Tuple.Homotuple (Homotuple, errorLengthMismatch)
+import Data.Tuple.OneTuple  (OneTuple (OneTuple))
+import GHC.Exts             (IsList (Item, fromList, toList))
 
 type instance Homotuple 1 a = OneTuple a
 

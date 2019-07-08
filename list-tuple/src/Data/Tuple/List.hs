@@ -50,7 +50,7 @@ module Data.Tuple.List
   , HasCons' (..)
   , HasUncons' (..)
     -- ** More concrete type classes
-    -- This classes are for n-tuples (n ‚âß 2) and for concrete 1-tuples, 2-tupes.
+    -- This classes are for n-tuples (n ÅÜ 2) and for concrete 1-tuples, 2-tupes.
   , HasHead (..)
   , HasLast (..)
   , HasTail (..)
@@ -71,16 +71,15 @@ module Data.Tuple.List
   , HasAt (..)
   ) where
 
-import           Prelude               (Int, Integral, fromInteger, id, ($))
+import Prelude (Int, Integral, fromInteger, id, ($))
 
-import           Data.Functor.Identity (Identity)
-import           Data.Kind             (Type)
-import           Data.Proxy            (Proxy (Proxy))
-import           Data.Tuple.OneTuple   (OneTuple)
-import           Data.Tuple.Only       (Only)
-import           Data.Tuple.Single     (Single (unwrap, wrap))
-import           GHC.TypeLits          (ErrorMessage (Text), KnownNat, Nat,
-                                        TypeError, natVal)
+import Data.Functor.Identity (Identity)
+import Data.Kind             (Type)
+import Data.Proxy            (Proxy (Proxy))
+import Data.Tuple.OneTuple   (OneTuple)
+import Data.Tuple.Only       (Only)
+import Data.Tuple.Single     (Single (unwrap, wrap))
+import GHC.TypeLits          (ErrorMessage (Text), KnownNat, Nat, TypeError, natVal)
 
 -- Basic functions
 

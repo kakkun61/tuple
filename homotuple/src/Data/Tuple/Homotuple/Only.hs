@@ -17,9 +17,9 @@
 
 module Data.Tuple.Homotuple.Only () where
 
-import           Data.Tuple.Homotuple (Homotuple, errorLengthMismatch)
-import           Data.Tuple.Only      (Only (Only))
-import           GHC.Exts             (IsList (Item, fromList, toList))
+import Data.Tuple.Homotuple (Homotuple, errorLengthMismatch)
+import Data.Tuple.Only      (Only (Only))
+import GHC.Exts             (IsList (Item, fromList, toList))
 
 type instance Homotuple 1 a = Only a
 

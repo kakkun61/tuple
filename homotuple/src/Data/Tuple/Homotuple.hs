@@ -40,7 +40,7 @@ module Data.Tuple.Homotuple
   , errorLengthMismatch
   ) where
 
-import           Prelude             (error, ($), (.))
+import Prelude (error, ($), (.))
 
 import qualified Control.Applicative as A
 import qualified Control.Monad       as M
@@ -241,31 +241,31 @@ instance IsList (a, a, a, a, a, a, a, a, a, a) where
 instance IsList (a, a, a, a, a, a, a, a, a, a, a) where
   type Item (a, a, a, a, a, a, a, a, a, a, a) = a
   fromList [a, b, c, d, e, f, g, h, i, j, k] = (a, b, c, d, e, f, g, h, i, j, k)
-  fromList _ = errorLengthMismatch
+  fromList _                                 = errorLengthMismatch
   toList (a, b, c, d, e, f, g, h, i, j, k) = [a, b, c, d, e, f, g, h, i, j, k]
 
 instance IsList (a, a, a, a, a, a, a, a, a, a, a, a) where
   type Item (a, a, a, a, a, a, a, a, a, a, a, a) = a
   fromList [a, b, c, d, e, f, g, h, i, j, k, l] = (a, b, c, d, e, f, g, h, i, j, k, l)
-  fromList _ = errorLengthMismatch
+  fromList _                                    = errorLengthMismatch
   toList (a, b, c, d, e, f, g, h, i, j, k, l) = [a, b, c, d, e, f, g, h, i, j, k, l]
 
 instance IsList (a, a, a, a, a, a, a, a, a, a, a, a, a) where
   type Item (a, a, a, a, a, a, a, a, a, a, a, a, a) = a
   fromList [a, b, c, d, e, f, g, h, i, j, k, l, m] = (a, b, c, d, e, f, g, h, i, j, k, l, m)
-  fromList _ = errorLengthMismatch
+  fromList _                                       = errorLengthMismatch
   toList (a, b, c, d, e, f, g, h, i, j, k, l, m) = [a, b, c, d, e, f, g, h, i, j, k, l, m]
 
 instance IsList (a, a, a, a, a, a, a, a, a, a, a, a, a, a) where
   type Item (a, a, a, a, a, a, a, a, a, a, a, a, a, a) = a
   fromList [a, b, c, d, e, f, g, h, i, j, k, l, m, n] = (a, b, c, d, e, f, g, h, i, j, k, l, m, n)
-  fromList _ = errorLengthMismatch
+  fromList _                                          = errorLengthMismatch
   toList (a, b, c, d, e, f, g, h, i, j, k, l, m, n) = [a, b, c, d, e, f, g, h, i, j, k, l, m, n]
 
 instance IsList (a, a, a, a, a, a, a, a, a, a, a, a, a, a, a) where
   type Item (a, a, a, a, a, a, a, a, a, a, a, a, a, a, a) = a
   fromList [a, b, c, d, e, f, g, h, i, j, k, l, m, n, o] = (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o)
-  fromList _ = errorLengthMismatch
+  fromList _                                             = errorLengthMismatch
   toList (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o) = [a, b, c, d, e, f, g, h, i, j, k, l, m, n, o]
 
 errorLengthMismatch :: HasCallStack => a

@@ -17,9 +17,9 @@
 
 module Data.Tuple.Homotuple.Identity () where
 
-import           Data.Functor.Identity (Identity (Identity))
-import           Data.Tuple.Homotuple  (Homotuple, errorLengthMismatch)
-import           GHC.Exts              (IsList (Item, fromList, toList))
+import Data.Functor.Identity (Identity (Identity))
+import Data.Tuple.Homotuple  (Homotuple, errorLengthMismatch)
+import GHC.Exts              (IsList (Item, fromList, toList))
 
 type instance Homotuple 1 a = Identity a
 
