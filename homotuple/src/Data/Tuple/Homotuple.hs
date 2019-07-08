@@ -1,3 +1,4 @@
+{-# LANGUAGE ConstraintKinds        #-}
 {-# LANGUAGE DataKinds              #-}
 {-# LANGUAGE FlexibleContexts       #-}
 {-# LANGUAGE FlexibleInstances      #-}
@@ -21,24 +22,35 @@
 
 module Data.Tuple.Homotuple
   ( Homotuple
-    -- * List-like
-  , map
+    -- * Functor-like
+  , (<$>)
+    -- * Applicative-like
+  , (<*>)
+  , pure
+    -- * Monad-like
+  , (>>=)
     -- * Semigoupe-like
   , (<>)
-    -- * Monid-like
+    -- * Monoid-like
   , empty
-    -- * Others
+    -- * Utility constraints
+  , IsHomolisttuple
+  , IsHomotupleItem
+    -- * For implementers
   , errorLengthMismatch
   ) where
 
-import           Prelude        (error, ($), (.))
+import           Prelude             (error, ($), (.))
 
-import           Data.Kind      (Type)
-import qualified Data.List      as L
-import qualified Data.Semigroup as S
-import           GHC.Exts       (IsList (Item, fromList, toList))
-import           GHC.Stack      (HasCallStack)
-import           GHC.TypeLits   (type (+), Nat)
+import qualified Control.Applicative as A
+import qualified Control.Monad       as M
+import           Data.Kind           (Type)
+import qualified Data.List           as L
+import qualified Data.Semigroup      as S
+import           Data.Tuple.Single   (Single (wrap))
+import           GHC.Exts            (IsList (Item, fromList, toList))
+import           GHC.Stack           (HasCallStack)
+import           GHC.TypeLits        (type (*), type (+), Nat)
 
 type family Homotuple (n :: Nat) (a :: Type) = (t :: Type) | t -> n
 
@@ -259,30 +271,64 @@ instance IsList (a, a, a, a, a, a, a, a, a, a, a, a, a, a, a) where
 errorLengthMismatch :: HasCallStack => a
 errorLengthMismatch = error "length mismatch"
 
--- List transformations
+-- Utility constraints
 
-map
-  :: ( IsList (Homotuple n a)
-     , IsList (Homotuple n b)
-     , a ~ Item (Homotuple n a)
-     , b ~ Item (Homotuple n b)
+type IsHomolisttuple (n :: Nat) a = IsList (Homotuple n a)
+type IsHomotupleItem (n :: Nat) a = a ~ Item (Homotuple n a)
+
+-- Functor-like
+
+(<$>)
+  :: ( IsHomolisttuple n a
+     , IsHomolisttuple n b
+     , IsHomotupleItem n a
+     , IsHomotupleItem n b
      )
   => (a -> b) -> Homotuple n a -> Homotuple n b
-map f = fromList . L.map f . toList
+f <$> t = fromList $ L.map f $ toList t
+
+-- Applicative-like
+
+(<*>)
+  :: ( IsHomolisttuple n0 (a -> b)
+     , IsHomolisttuple n1 a
+     , IsHomolisttuple (n0 * n1) b
+     , IsHomotupleItem n0 (a -> b)
+     , IsHomotupleItem n1 a
+     , IsHomotupleItem (n0 * n1) b
+     )
+  => Homotuple n0 (a -> b) -> Homotuple n1 a -> Homotuple (n0 * n1) b
+f <*> t = fromList $ toList f A.<*> toList t
+
+pure :: Single c => a -> c a
+pure = wrap
+
+-- Monad-like
+
+(>>=)
+  :: ( IsHomolisttuple n0 a
+     , IsHomolisttuple n1 b
+     , IsHomolisttuple (n0 * n1) b
+     , IsHomotupleItem n0 a
+     , IsHomotupleItem n1 b
+     , IsHomotupleItem (n0 * n1) b
+     )
+  => Homotuple n0 a -> (a -> Homotuple n1 b) -> Homotuple (n0 * n1) b
+m >>= f = fromList $ toList m M.>>= (toList . f)
 
 -- Semigroup-like
 
 (<>)
-  :: ( IsList (Homotuple n1 a)
-     , IsList (Homotuple n2 a)
-     , IsList (Homotuple (n1 + n2) a)
-     , a ~ Item (Homotuple n1 a)
-     , a ~ Item (Homotuple n2 a)
-     , a ~ Item (Homotuple (n1 + n2) a)
+  :: ( IsHomolisttuple n0 a
+     , IsHomolisttuple n1 a
+     , IsHomolisttuple (n0 + n1) a
+     , IsHomotupleItem n0 a
+     , IsHomotupleItem n1 a
+     , IsHomotupleItem (n0 + n1) a
      )
-  => Homotuple n1 a
-  -> Homotuple n2 a
-  -> Homotuple (n1 + n2) a
+  => Homotuple n0 a
+  -> Homotuple n1 a
+  -> Homotuple (n0 + n1) a
 a <> b = fromList $ toList a S.<> toList b
 
 infixr 6 <>

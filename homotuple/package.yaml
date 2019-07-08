@@ -44,3 +44,4 @@ library:
   dependencies:
   - OneTuple
   - Only
+  - single-tuple
