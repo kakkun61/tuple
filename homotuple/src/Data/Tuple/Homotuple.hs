@@ -2,6 +2,7 @@
 {-# LANGUAGE DataKinds              #-}
 {-# LANGUAGE FlexibleContexts       #-}
 {-# LANGUAGE FlexibleInstances      #-}
+{-# LANGUAGE ScopedTypeVariables    #-}
 {-# LANGUAGE Trustworthy            #-}
 {-# LANGUAGE TypeFamilies           #-}
 {-# LANGUAGE TypeFamilyDependencies #-}
@@ -22,6 +23,8 @@
 
 module Data.Tuple.Homotuple
   ( Homotuple
+    -- * List-like
+  , replicate
     -- * Functor-like
   , (<$>)
     -- * Applicative-like
@@ -40,17 +43,18 @@ module Data.Tuple.Homotuple
   , errorLengthMismatch
   ) where
 
-import Prelude (error, ($), (.))
+import Prelude (Num (fromInteger), error, ($), (.))
 
 import qualified Control.Applicative as A
 import qualified Control.Monad       as M
 import           Data.Kind           (Type)
 import qualified Data.List           as L
+import           Data.Proxy          (Proxy (Proxy))
 import qualified Data.Semigroup      as S
 import           Data.Tuple.Single   (Single (wrap))
 import           GHC.Exts            (IsList (Item, fromList, toList))
 import           GHC.Stack           (HasCallStack)
-import           GHC.TypeLits        (type (*), type (+), Nat)
+import           GHC.TypeLits        (type (*), type (+), KnownNat, Nat, natVal)
 
 type family Homotuple (n :: Nat) (a :: Type) = (t :: Type) | t -> n
 
@@ -275,6 +279,11 @@ errorLengthMismatch = error "length mismatch"
 
 type IsHomolisttuple (n :: Nat) a = IsList (Homotuple n a)
 type IsHomotupleItem (n :: Nat) a = a ~ Item (Homotuple n a)
+
+-- List-like
+
+replicate :: forall (n :: Nat) a. (IsHomolisttuple n a, IsHomotupleItem n a, KnownNat n) => a -> Homotuple n a
+replicate = fromList . L.replicate (fromInteger $ natVal (Proxy :: Proxy n))
 
 -- Functor-like
 
