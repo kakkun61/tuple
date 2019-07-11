@@ -58,7 +58,7 @@ import           GHC.TypeLits        (type (*), type (+), KnownNat, Nat, natVal)
 
 type family Homotuple (n :: Nat) (a :: Type) = (t :: Type) | t -> n
 
-type instance Homotuple 0 a = ()
+type instance Homotuple 0 a = Proxy a
 
 type instance Homotuple 2 a = (a, a)
 
@@ -182,11 +182,11 @@ type instance Homotuple 61 a = (a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, 
 
 type instance Homotuple 62 a = (a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a)
 
-instance IsList () where
-  type Item () = ()
-  fromList [] = ()
+instance IsList (Proxy a) where
+  type Item (Proxy a) = a
+  fromList [] = Proxy
   fromList _  = errorLengthMismatch
-  toList () = []
+  toList _ = []
 
 instance IsList (a, a) where
   type Item (a, a) = a
@@ -345,4 +345,4 @@ infixr 6 <>
 -- Monoid-like
 
 empty :: Homotuple 0 a
-empty = ()
+empty = Proxy

@@ -180,6 +180,8 @@ class HasAt t (n :: Nat) where
 
 -- 0
 
+--- Unit
+
 type instance Head () = TypeError (Text "empty tuple")
 type instance Tail () = TypeError (Text "empty tuple")
 type instance Init () = TypeError (Text "empty tuple")
@@ -196,6 +198,25 @@ instance HasReverse' () () where
   reverse' = id
 
 instance HasReverse ()
+
+--- Proxy
+
+type instance Head (Proxy a) = TypeError (Text "empty tuple")
+type instance Tail (Proxy a) = TypeError (Text "empty tuple")
+type instance Init (Proxy a) = TypeError (Text "empty tuple")
+type instance Last (Proxy a) = TypeError (Text "empty tuple")
+type instance Length (Proxy a) = 0
+
+instance HasLength (Proxy a)
+
+{-# COMPLETE Null :: Proxy #-}
+
+type instance Reverse (Proxy a) = (Proxy a)
+
+instance {-# OVERLAPPING #-} HasReverse' (Proxy a) (Proxy a) where
+  reverse' = id
+
+instance HasReverse (Proxy a)
 
 -- 1
 
@@ -224,7 +245,7 @@ instance Single c => HasUncons' (c a) a () where
 {-# COMPLETE Cons :: OneTuple #-}
 {-# COMPLETE Cons :: Only #-}
 
-instance Single c => HasReverse' (c a) (c a) where
+instance {-# OVERLAPPABLE #-} Single c => HasReverse' (c a) (c a) where
   reverse' = id
 
 instance Single c => HasAt' (c a) 0 a where
