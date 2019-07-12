@@ -50,7 +50,7 @@ module Data.Tuple.List
   , HasCons' (..)
   , HasUncons' (..)
     -- ** More concrete type classes
-    -- This classes are for n-tuples (n ÅÜ 2) and for concrete 1-tuples, 2-tupes.
+    -- This classes are for n-tuples (n ‚â¶ 2) and for concrete 1-tuples, 2-tupes.
   , HasHead (..)
   , HasLast (..)
   , HasTail (..)
