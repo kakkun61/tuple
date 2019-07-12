@@ -27,7 +27,7 @@ preProcessListTuple _ _ = do
     templateAtPath = "template/ListAt.hs"
   tempPath <-
     withFile srcPath ReadMode $ \src -> do
-      tempDir <- (++ "list-tuple") <$> getTemporaryDirectory
+      tempDir <- (++ "/list-tuple") <$> getTemporaryDirectory
       createDirectoryIfMissing True tempDir
       (tempPath, temp) <- openTempFile tempDir file
       putStrLn $ "temporaly file: " ++ tempPath
