@@ -65,13 +65,14 @@ module Data.Tuple.List
     -- * List transfomations
   , Reverse
   , HasReverse (..)
+  , HasReverse' (..)
     -- * Indexing tuples
   , type (!!)
   , HasAt' (..)
   , HasAt (..)
   ) where
 
-import Prelude (Int, Integral, fromInteger, id, ($))
+import Prelude (Int, Integral, error, fromInteger, id, ($))
 
 import Data.Functor.Identity (Identity)
 import Data.Kind             (Type)
@@ -223,10 +224,10 @@ instance HasReverse (Proxy a)
 instance {-# OVERLAPPABLE #-} (Single c, t ~ c a) => HasHead' t a where
   head' = unwrap
 
-instance Single c => HasTail' (c a) () where
+instance {-# OVERLAPPABLE #-} Single c => HasTail' (c a) () where
   tail' _ = ()
 
-instance Single c => HasInit' (c a) () where
+instance {-# OVERLAPPABLE #-} Single c => HasInit' (c a) () where
   init' _ = ()
 
 instance {-# OVERLAPPABLE #-} Single c => HasLast' (c a) a where

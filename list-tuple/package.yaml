@@ -13,7 +13,6 @@ extra-source-files:
 synopsis: List-like operations for tuples
 category: Data
 
-
 description: Please see the README on GitHub at <https://github.com/kakkun61/tuple#readme>
 
 dependencies:
@@ -41,6 +40,24 @@ library:
   - single-tuple
   - OneTuple
   - Only
+
+tests:
+  test:
+    main: Spec.hs
+    source-dirs: test
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    - -Wno-missing-export-lists
+    - -Wno-missing-import-lists
+    dependencies:
+    - list-tuple
+    - hspec
+    - should-not-typecheck
+    - deepseq
+    - text
+    - strip-ansi-escape
 
 custom-setup:
   dependencies:

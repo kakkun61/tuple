@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: c2259a2d6d1cb1ca9561b2c767880e0e739ea6ca4e538009bdcb17194f1e8269
+-- hash: 020650e46cd3a7077ede7715daa2098280e391b751ab90d77d37974854d44b0d
 
 name:           single-tuple
 version:        0.1.0.0
@@ -39,4 +39,21 @@ library
       OneTuple
     , Only
     , base
+  default-language: Haskell2010
+
+test-suite test
+  type: exitcode-stdio-1.0
+  main-is: Spec.hs
+  other-modules:
+      Data.Tuple.SingleSpec
+      Paths_single_tuple
+  hs-source-dirs:
+      test
+  ghc-options: -Wall -Wcompat -Wincomplete-uni-patterns -Wincomplete-record-updates -Wmonomorphism-restriction -Wmissing-exported-signatures -Wmissing-export-lists -Wmissing-home-modules -Wmissing-import-lists -Widentities -Wredundant-constraints -Wpartial-fields -Wno-name-shadowing -Wno-unticked-promoted-constructors -threaded -rtsopts -with-rtsopts=-N -Wno-missing-export-lists -Wno-missing-import-lists
+  build-depends:
+      OneTuple
+    , Only
+    , base
+    , hspec
+    , single-tuple
   default-language: Haskell2010
