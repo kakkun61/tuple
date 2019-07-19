@@ -57,6 +57,8 @@ tests:
     - should-not-typecheck
     - deepseq
     - text
+    - Only
+    - single-tuple
     - strip-ansi-escape
 
 custom-setup:

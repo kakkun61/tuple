@@ -1,3 +1,4 @@
+{-# LANGUAGE AllowAmbiguousTypes    #-}
 {-# LANGUAGE DataKinds              #-}
 {-# LANGUAGE DefaultSignatures      #-}
 {-# LANGUAGE FlexibleContexts       #-}
@@ -6,6 +7,7 @@
 {-# LANGUAGE PatternSynonyms        #-}
 {-# LANGUAGE Safe                   #-}
 {-# LANGUAGE ScopedTypeVariables    #-}
+{-# LANGUAGE TypeApplications       #-}
 {-# LANGUAGE TypeFamilies           #-}
 {-# LANGUAGE TypeFamilyDependencies #-}
 {-# LANGUAGE TypeOperators          #-}
@@ -72,7 +74,7 @@ module Data.Tuple.List
   , HasAt (..)
   ) where
 
-import Prelude (Int, Integral, error, fromInteger, id, ($))
+import Prelude (Int, Integral, fromInteger, id, ($))
 
 import Data.Functor.Identity (Identity)
 import Data.Kind             (Type)
@@ -173,11 +175,16 @@ type family t !! (n :: Nat) :: Type
 
 class HasAt' t (n :: Nat) e where
   (!!!) :: t -> proxy n -> e
+  t !!! _ = at' @t @n @e t
+  at' :: t -> e
+  at' t = t !!! (Proxy :: Proxy n)
 
 class HasAt t (n :: Nat) where
   (!!) :: t -> proxy n -> t !! n
   default (!!) :: HasAt' t n (t !! n) => t -> proxy n -> t !! n
   (!!) = (!!!)
+  at :: t -> t !! n
+  at t = t !! (Proxy :: Proxy n)
 
 -- 0
 
