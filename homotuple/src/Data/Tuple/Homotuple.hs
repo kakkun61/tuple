@@ -2,6 +2,7 @@
 {-# LANGUAGE DataKinds              #-}
 {-# LANGUAGE FlexibleContexts       #-}
 {-# LANGUAGE FlexibleInstances      #-}
+{-# LANGUAGE PatternSynonyms        #-}
 {-# LANGUAGE ScopedTypeVariables    #-}
 {-# LANGUAGE Trustworthy            #-}
 {-# LANGUAGE TypeFamilies           #-}
@@ -35,7 +36,7 @@ module Data.Tuple.Homotuple
     -- * Semigoupe-like
   , (<>)
     -- * Monoid-like
-  , empty
+  , pattern Empty
     -- * Utility constraints
   , IsHomolisttuple
   , IsHomotupleItem
@@ -344,5 +345,5 @@ infixr 6 <>
 
 -- Monoid-like
 
-empty :: Homotuple 0 a
-empty = Proxy
+pattern Empty :: Homotuple 0 a
+pattern Empty = Proxy
