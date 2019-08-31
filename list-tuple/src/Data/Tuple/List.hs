@@ -74,7 +74,7 @@ module Data.Tuple.List
   , HasAt (..)
   ) where
 
-import Prelude (Int, Integral, fromInteger, id, ($))
+import Prelude (Integral, error, fromInteger, id, ($))
 
 import Data.Functor.Identity (Identity)
 import Data.Kind             (Type)
@@ -146,8 +146,8 @@ class HasLength t where
   default length :: (Integral n, KnownNat (Length t)) => t -> n
   length _ = fromInteger $ natVal (Proxy :: Proxy (Length t))
 
-pattern Null :: HasLength t => t
-pattern Null <- (length -> 0 :: Int)
+pattern Null :: Length t ~ 0 => t
+pattern Null <- _
 
 pattern Cons' :: (HasCons' t a u, HasUncons' t a u) => a -> u -> t
 pattern Cons' a u <- (uncons' -> (a, u)) where
@@ -215,6 +215,12 @@ type instance Init (Proxy a) = TypeError (Text "empty tuple")
 type instance Last (Proxy a) = TypeError (Text "empty tuple")
 type instance Length (Proxy a) = 0
 
+instance TypeError (Text "empty tuple") => HasTail' (Proxy a) b where
+  tail' = error "never reach here"
+
+instance TypeError (Text "empty tuple") => HasInit' (Proxy a) b where
+  init' = error "never reach here"
+
 instance HasLength (Proxy a)
 
 {-# COMPLETE Null :: Proxy #-}
@@ -231,10 +237,10 @@ instance HasReverse (Proxy a)
 instance {-# OVERLAPPABLE #-} (Single c, t ~ c a) => HasHead' t a where
   head' = unwrap
 
-instance {-# OVERLAPPABLE #-} Single c => HasTail' (c a) () where
+instance {-# OVERLAPPABLE #-} (Single c, b ~ ()) => HasTail' (c a) b where
   tail' _ = ()
 
-instance {-# OVERLAPPABLE #-} Single c => HasInit' (c a) () where
+instance {-# OVERLAPPABLE #-} (Single c, b ~ ()) => HasInit' (c a) b where
   init' _ = ()
 
 instance {-# OVERLAPPABLE #-} Single c => HasLast' (c a) a where
@@ -253,10 +259,13 @@ instance Single c => HasUncons' (c a) a () where
 {-# COMPLETE Cons :: OneTuple #-}
 {-# COMPLETE Cons :: Only #-}
 
-instance {-# OVERLAPPABLE #-} Single c => HasReverse' (c a) (c a) where
+instance {-# OVERLAPPABLE #-} Single c => HasLength (c a) where
+  length _ = 1
+
+instance {-# OVERLAPPABLE #-} (Single c0, Single c1, c0 ~ c1, a ~ b) => HasReverse' (c0 a) (c1 b) where
   reverse' = id
 
-instance Single c => HasAt' (c a) 0 a where
+instance {-# OVERLAPPABLE #-} (Single c, a ~ b) => HasAt' (c a) 0 b where
   t !!! _ = unwrap t
 
 -- 2

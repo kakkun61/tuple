@@ -1,7 +1,9 @@
 {-# LANGUAGE DataKinds           #-}
 {-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE TypeFamilies #-}
 
-{-# OPTIONS_GHC -fdefer-type-errors -Wno-deferred-type-errors #-}
+{-# OPTIONS_GHC -fdefer-type-errors -Wno-deferred-type-errors -Wno-redundant-constraints #-}
 
 module Data.Tuple.ListSpec (spec) where
 
@@ -10,14 +12,9 @@ import Data.Tuple.List
 import Test.Hspec
 import Test.ShouldNotTypecheck
 
-import Prelude (Applicative (pure), Bool (False, True), seq, ($), Eq ((==)), Int)
+import Prelude hiding (head, tail, init, last, length, reverse, (!!))
 
-import           Control.DeepSeq                        (NFData, force)
-import           Control.Exception
 import           Data.Proxy
-import           Data.String.AnsiEscapeCodes.Strip.Text
-import qualified Data.Text                              as T
-import           Data.Tuple.Only
 import           Data.Tuple.Single
 
 spec :: Spec
@@ -54,18 +51,32 @@ spec = do
       it "last" $ do
         shouldNotTypecheck $ last ()
 
+      it "cons" $ do
+        shouldNotTypecheck (cons 'a' () :: ())
+
       it "uncons" $ do
         shouldNotTypecheck $ uncons ()
 
+      it "Length" $ do
+        (Proxy :: Proxy (Length ())) `shouldBe` (Proxy :: Proxy 0)
+
       it "length" $ do
-        length () `shouldBe` 0
+        length () `shouldBe` (0 :: Int)
 
       it "Null" $ do
         case () of { Null -> True ; _ -> False } `shouldBe` True
 
       describe "Cons'" $ do
+        it "construct" $ do
+          shouldNotTypecheck $ Cons' 'a' ()
         it "deconstruct" $ do
-          shouldNotTypecheck $ case () of { Cons' _ _ -> False }
+          shouldNotTypecheck $ case () of { Cons' _ _ -> () ; _ -> () }
+
+      describe "Cons" $ do
+        it "construct" $ do
+          shouldNotTypecheck $ Cons 'a' ()
+        it "deconstruct" $ do
+          shouldNotTypecheck $ case () of { Cons _ _ -> () ; _ -> () }
 
       it "reverse'" $ do
         reverse' () `shouldBe` ()
@@ -89,12 +100,10 @@ spec = do
       it "head'" $ do
         shouldNotTypecheck (head' (Proxy :: Proxy Int) :: ())
 
-      -- When searching for "HasTail'" instance for "Proxy", "HasTail' (c a) ()" is matched.
-      -- But it is type error, because "Proxy" satisfies the "Single" constraint.
+      -- When searching for "HasTail'" instance for "Proxy", "HasTail' (Proxy a) ()" is matched.
+      -- But it is type error, because of "TypeError" constraint.
       -- However on deferred type error environent this does not throw type error,
-      -- becouse the "tail'" implementation of "HasHead' (c a) ()" does not call any "Single"'s functions.
-      -- If "instance TypeError (Text "empty tuple") => HasTail' (Proxy a) ()" is added,
-      -- it does not overlap "HasTail' (c a) ()" because they have different constraints.
+      -- becouse the "tail'" implementation of "HasHead' (Proxy a) ()" does not call any "TypeError"'s functions.
       -- it "tail'" $ do
       --   shouldNotTypecheck (tail' (Proxy :: Proxy Int) :: ())
 
@@ -127,15 +136,26 @@ spec = do
       it "uncons" $ do
         shouldNotTypecheck $ uncons (Proxy :: Proxy Int)
 
+      it "Length" $ do
+        (Proxy :: Proxy (Length (Proxy ()))) `shouldBe` (Proxy :: Proxy 0)
+
       it "length" $ do
-       length (Proxy :: Proxy Int) `shouldBe` 0
+       length (Proxy :: Proxy Int) `shouldBe` (0 :: Int)
 
       it "Null" $ do
         case (Proxy :: Proxy Int) of { Null -> True ; _ -> False } `shouldBe` True
 
       describe "Cons'" $ do
+        it "construct" $ do
+          shouldNotTypecheck $ Cons' 'a' ()
         it "deconstruct" $ do
-          shouldNotTypecheck $ case (Proxy :: Proxy Int) of { Cons' _ _ -> False }
+          shouldNotTypecheck $ case (Proxy :: Proxy Int) of { Cons' _ _ -> () ; _ -> () }
+
+      describe "Cons" $ do
+        it "construct" $ do
+          shouldNotTypecheck $ Cons 'a' ()
+        it "deconstruct" $ do
+          shouldNotTypecheck $ case (Proxy :: Proxy Int) of { Cons _ _ -> () ; _ -> () }
 
       it "reverse'" $ do
         reverse' (Proxy :: Proxy Int) `shouldBe` (Proxy :: Proxy Int)
@@ -144,7 +164,7 @@ spec = do
         reverse (Proxy :: Proxy Int) `shouldBe` (Proxy :: Proxy Int)
 
       it "(!!!)" $ do
-        shouldNotTypecheck ((Proxy :: Proxy Int) !!! (Proxy :: Proxy 0) :: Int
+        shouldNotTypecheck ((Proxy :: Proxy Int) !!! (Proxy :: Proxy 0) :: Int)
 
       it "at'" $ do
         shouldNotTypecheck $ at' @(Proxy Int) @0 @Int Proxy
@@ -155,97 +175,365 @@ spec = do
       it "at" $ do
         shouldNotTypecheck $ at @(Proxy Int) @0 Proxy
 
-  describe "1-tuple" $ do
+  describe "2-tuple" $ do
     describe "Single" $ do
       it "head'" $ do
-        let a = 0 :: Int
-        head' (Single a :: Only Int) `shouldBe` a
+        let
+          a, b :: Int
+          a = 0
+          b = 1
+        head' (a, b) `shouldBe` a
 
       it "tail'" $ do
-        tail' (Single 0 :: Only Int) `shouldBe` ()
+        let
+          a, b :: Int
+          a = 0
+          b = 1
+        shouldNotTypecheck $ tail' (a, b)
 
       it "init'" $ do
-        init' (Single 0 :: Only Int) `shouldBe` ()
+        let
+          a, b :: Int
+          a = 0
+          b = 1
+        shouldNotTypecheck $ init' (a, b)
 
       it "last'" $ do
-        let a = 0 :: Int
-        last' (Single a :: Only Int) `shouldBe` a
-
-      it "cons'" $ do
-        let a = 0 :: Int
-        cons' a () `shouldBe` (Single a :: Only Int)
-
-      it "uncons'" $ do
-        let a = 0 :: Int
-        uncons' (Single a :: Only Int) `shouldBe` (a, ())
+        let
+          a, b :: Int
+          a = 0
+          b = 1
+        last' (a, b) `shouldBe` b
 
       it "head" $ do
-        let a = 0 :: Int
-        shouldNotTypecheck (head (Single a :: Only Int) :: Int)
+        let
+          a, b :: Int
+          a = 0
+          b = 1
+        head (a, b) `shouldBe` a
 
       it "tail" $ do
-        shouldNotTypecheck (tail (Single 0 :: Only Int) :: ())
+        let
+          a, b :: Int
+          a = 0
+          b = 1
+        shouldNotTypecheck $ tail (a, b)
 
       it "init" $ do
-        shouldNotTypecheck (init (Single 0 :: Only Int) :: ())
+        let
+          a, b :: Int
+          a = 0
+          b = 1
+        shouldNotTypecheck $ init (a, b)
 
       it "last" $ do
-        let a = 0 :: Int
-        shouldNotTypecheck (last (Single a :: Only Int) :: Int)
+        let
+          a, b :: Int
+          a = 0
+          b = 1
+        last (a, b) `shouldBe` b
 
       it "cons" $ do
-        let a = 0 :: Int
-        shouldNotTypecheck (cons a () :: Only Int)
+        let
+          a, b :: Int
+          a = 0
+          b = 1
+        shouldNotTypecheck $ cons a (Single b)
 
       it "uncons" $ do
-        let a = 0 :: Int
-        shouldNotTypecheck (uncons (Single a :: Only Int) :: (Int, ()))
+        let
+          a, b :: Int
+          a = 0
+          b = 1
+        shouldNotTypecheck $ uncons (a, b)
+
+      it "Length" $ do
+        let
+          target :: Length (Int, Int) ~ 2 => ()
+          target = ()
+        seq target $ pure () :: IO ()
+
+      it "length" $ do
+        length ((0, 1) :: (Int, Int)) `shouldBe` (2 :: Int)
 
       it "Null" $ do
-        shouldNotTypecheck $ case Single 0 :: Only Int of { Null -> () }
+        let
+          a, b :: Int
+          a = 0
+          b = 1
+        shouldNotTypecheck $ case (a, b) of { Null -> () }
 
       describe "Cons'" $ do
         it "construct" $ do
-          let a = 0 :: Int
-          (Cons' a () :: Only Int) `shouldBe` Only a
+          let
+            a, b :: Int
+            a = 0
+            b = 1
+          shouldNotTypecheck $ (Cons' a (Single b) :: (Int, Int))
 
         it "deconstruct" $ do
-          let a = 0 :: Int
-          case Single a :: Only Int of { Cons' b () | a == b -> True ; _ -> False } `shouldBe` True
+          let
+            a, b :: Int
+            a = 0
+            b = 1
+          shouldNotTypecheck $ case (a, b) of { Cons' _ (Single _) -> () }
 
       describe "Cons" $ do
         it "construct" $ do
-          let a = 0 :: Int
-          shouldNotTypecheck (Cons a () :: Only Int)
+          let
+            a, b :: Int
+            a = 0
+            b = 1
+          shouldNotTypecheck $ Cons a (Single b)
 
         it "deconstruct" $ do
-          let a = 0 :: Int
-          shouldNotTypecheck $ case Single a :: Only Int of { Cons b () | a == b -> () }
+          let
+            a, b :: Int
+            a = 0
+            b = 1
+          shouldNotTypecheck $ case (a, b) of { Cons _ (Single _) -> () }
 
       it "reverse'" $ do
-        let a = Single 0 :: Only Int
-        reverse' a `shouldBe` a
+        let
+          a, b :: Int
+          a = 0
+          b = 1
+        reverse' (a, b) `shouldBe` (b, a)
 
       it "reverse" $ do
-        let a = Single 0 :: Only Int
-        shouldNotTypecheck (reverse a :: Only Int)
+        let
+          a, b :: Int
+          a = 0
+          b = 1
+        reverse (a, b) `shouldBe` (b, a)
 
       it "(!!!)" $ do
-        let a = 0 :: Int
-        (Single a :: Only Int) !!! (Proxy :: Proxy 0) `shouldBe` a
-        shouldNotTypecheck ((Single a :: Only Int) !!! (Proxy :: Proxy 1) :: Int)
+        let
+          a, b :: Int
+          a = 0
+          b = 1
+        (a, b) !!! (Proxy :: Proxy 0) `shouldBe` a
+        (a, b) !!! (Proxy :: Proxy 1) `shouldBe` b
 
-      it "(at')" $ do
-        let a = 0 :: Int
-        at' @(Only Int) @0 @Int (Single a) `shouldBe` a
-        shouldNotTypecheck $ at' @(Only Int) @1 @Int (Single a)
+      it "at'" $ do
+        let
+          a, b :: Int
+          a = 0
+          b = 1
+        at' @_ @0 @_ (a, b) `shouldBe` a
+        at' @_ @1 @_ (a, b) `shouldBe` b
 
       it "(!!)" $ do
-        let a = 0 :: Int
-        shouldNotTypecheck ((Single a :: Only Int) !! (Proxy :: Proxy 0) :: Int)
-        shouldNotTypecheck ((Single a :: Only Int) !! (Proxy :: Proxy 1) :: Int)
+        let
+          a, b :: Int
+          a = 0
+          b = 1
+        (a, b) !! (Proxy :: Proxy 0) `shouldBe` a
+        (a, b) !! (Proxy :: Proxy 1) `shouldBe` b
 
-      it "(at)" $ do
-        let a = 0 :: Int
-        at @(Only Int) @0 (Single a) `shouldBe` a
-        shouldNotTypecheck $ at @(Only Int) @1 (Single a)
+      it "at" $ do
+        let
+          a, b :: Int
+          a = 0
+          b = 1
+        at @_ @0 (a, b) `shouldBe` a
+        at @_ @1 (a, b) `shouldBe` b
+
+  describe "3-tuple" $ do
+    it "head'" $ do
+      let
+        a, b, c :: Int
+        a = 0
+        b = 1
+        c = 2
+      head' (a, b, c) `shouldBe` a
+
+    it "tail'" $ do
+      let
+        a, b, c :: Int
+        a = 0
+        b = 1
+        c = 2
+      tail' (a, b, c) `shouldBe` (b, c)
+
+    it "init'" $ do
+      let
+        a, b, c :: Int
+        a = 0
+        b = 1
+        c = 2
+      init' (a, b, c) `shouldBe` (a, b)
+
+    it "last'" $ do
+      let
+        a, b, c :: Int
+        a = 0
+        b = 1
+        c = 2
+      last' (a, b, c) `shouldBe` c
+
+    it "cons'" $ do
+      let
+        a, b, c :: Int
+        a = 0
+        b = 1
+        c = 2
+      cons' a (b, c) `shouldBe` (a, b, c)
+
+    it "uncons'" $ do
+      let
+        a, b, c :: Int
+        a = 0
+        b = 1
+        c = 2
+      uncons' (a, b, c) `shouldBe` (a, (b, c))
+
+    it "head" $ do
+      let
+        a, b, c :: Int
+        a = 0
+        b = 1
+        c = 2
+      head (a, b, c) `shouldBe` a
+
+    it "tail" $ do
+      let
+        a, b, c :: Int
+        a = 0
+        b = 1
+        c = 2
+      tail (a, b, c) `shouldBe` (b, c)
+
+    it "init" $ do
+      let
+        a, b, c :: Int
+        a = 0
+        b = 1
+        c = 2
+      init (a, b, c) `shouldBe` (a, b)
+
+    it "last" $ do
+      let
+        a, b, c :: Int
+        a = 0
+        b = 1
+        c = 2
+      last (a, b, c) `shouldBe` c
+
+    it "cons" $ do
+      let
+        a, b, c :: Int
+        a = 0
+        b = 1
+        c = 2
+      cons a (b, c) `shouldBe` (a, b, c)
+
+    it "uncons" $ do
+      let
+        a, b, c :: Int
+        a = 0
+        b = 1
+        c = 2
+      uncons (a, b, c) `shouldBe` (a, (b, c))
+
+    it "Length" $ do
+      let
+        target :: Length (Int, Int, Int) ~ 3 => ()
+        target = ()
+      seq target $ pure () :: IO ()
+
+    it "length" $ do
+      length ((0, 1, 2) :: (Int, Int, Int)) `shouldBe` (3 :: Int)
+
+    it "Null" $ do
+      shouldNotTypecheck $ case (0, 1, 2) :: (Int, Int, Int) of { Null -> () }
+
+    describe "Cons'" $ do
+      it "construct" $ do
+        let
+          a, b, c :: Int
+          a = 0
+          b = 1
+          c = 2
+        Cons' a (b, c) `shouldBe` (a, b, c)
+
+      it "deconstruct" $ do
+        let
+          a, b, c :: Int
+          a = 0
+          b = 1
+          c = 2
+        case (a, b, c) of { Cons' a' (b', c') -> (a, b, c) == (a', b', c')  ; _ -> False } `shouldBe` True
+
+    describe "Cons" $ do
+      it "construct" $ do
+        let
+          a, b, c :: Int
+          a = 0
+          b = 1
+          c = 2
+        Cons a (b, c) `shouldBe` (a, b, c)
+
+      it "deconstruct" $ do
+        let
+          a, b, c :: Int
+          a = 0
+          b = 1
+          c = 2
+        case (a, b, c) of { Cons a' (b', c') -> (a, b, c) == (a', b', c')  ; _ -> False } `shouldBe` True
+
+    it "reverse'" $ do
+      let
+        a, b, c :: Int
+        a = 0
+        b = 1
+        c = 2
+      reverse' (a, b, c) `shouldBe` (c, b, a)
+
+    it "reverse" $ do
+      let
+        a, b, c :: Int
+        a = 0
+        b = 1
+        c = 2
+      reverse (a, b, c) `shouldBe` (c, b, a)
+
+    it "(!!!)" $ do
+      let
+        a, b, c :: Int
+        a = 0
+        b = 1
+        c = 2
+      (a, b, c) !!! (Proxy :: Proxy 0) `shouldBe` a
+      (a, b, c) !!! (Proxy :: Proxy 1) `shouldBe` b
+      (a, b, c) !!! (Proxy :: Proxy 2) `shouldBe` c
+
+    it "at'" $ do
+      let
+        a, b, c :: Int
+        a = 0
+        b = 1
+        c = 2
+      at' @_ @0 @_ (a, b, c) `shouldBe` a
+      at' @_ @1 @_ (a, b, c) `shouldBe` b
+      at' @_ @2 @_ (a, b, c) `shouldBe` c
+
+    it "(!!)" $ do
+      let
+        a, b, c :: Int
+        a = 0
+        b = 1
+        c = 2
+      (a, b, c) !! (Proxy :: Proxy 0) `shouldBe` a
+      (a, b, c) !! (Proxy :: Proxy 1) `shouldBe` b
+      (a, b, c) !! (Proxy :: Proxy 2) `shouldBe` c
+
+    it "at" $ do
+      let
+        a, b, c :: Int
+        a = 0
+        b = 1
+        c = 2
+      at @_ @0 (a, b, c) `shouldBe` a
+      at @_ @1 (a, b, c) `shouldBe` b
+      at @_ @2 (a, b, c) `shouldBe` c

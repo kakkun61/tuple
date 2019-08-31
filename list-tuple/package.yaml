@@ -59,7 +59,6 @@ tests:
     - text
     - Only
     - single-tuple
-    - strip-ansi-escape
 
 custom-setup:
   dependencies:
