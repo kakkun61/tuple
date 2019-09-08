@@ -1,7 +1,6 @@
 {-# LANGUAGE DataKinds             #-}
 {-# LANGUAGE FlexibleInstances     #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
-{-# LANGUAGE Safe                  #-}
 {-# LANGUAGE TypeFamilies          #-}
 
 {-# OPTIONS_GHC -Wno-orphans #-}
@@ -22,7 +21,8 @@ module Data.Tuple.List.Identity () where
 import Prelude ()
 
 import Data.Functor.Identity (Identity)
-import Data.Tuple.List       (type (!!), Cons, HasAt, HasCons, HasHead, HasInit, HasLast, HasLength, HasReverse,
+import Data.Tuple.List       ()
+import Data.Tuple.List.Data  (type (!!), Cons, HasAt, HasCons, HasHead, HasInit, HasLast, HasLength, HasReverse,
                               HasTail, HasUncons, Head, Init, Last, Length, Reverse, Tail)
 
 -- 1

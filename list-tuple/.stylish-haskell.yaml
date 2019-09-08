@@ -228,4 +228,5 @@ newline: lf
 # No language extensions are enabled by default.
 language_extensions:
   - ExplicitNamespaces
+  - FlexibleContexts
   - TypeOperators

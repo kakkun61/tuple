@@ -17,6 +17,7 @@ description: Please see the README on GitHub at <https://github.com/kakkun61/tup
 
 dependencies:
 - base
+- template-haskell
 
 ghc-options:
 - -Wall
