@@ -1,6 +1,6 @@
 {-# LANGUAGE ExplicitNamespaces    #-}
-{-# LANGUAGE TemplateHaskellQuotes #-}
-{-# LANGUAGE Safe                  #-}
+{-# LANGUAGE TemplateHaskell       #-}
+{-# LANGUAGE Trustworthy           #-}
 
 {-# OPTIONS_HADDOCK show-extensions #-}
 
@@ -18,9 +18,8 @@ import Data.Tuple.List.Data (type (!!), Cons, HasAt, HasAt' ((!!!)), HasCons, Ha
                              HasReverse, HasReverse' (reverse'), HasTail, HasTail' (tail'), HasUncons,
                              HasUncons' (uncons'), Head, Init, Last, Length, Reverse, Tail)
 
-import Language.Haskell.TH (Body (NormalB), Clause (Clause), Dec (FunD, InstanceD, TySynInstD), Exp (TupE, VarE), Name,
-                            Pat (TupP, VarP, WildP), Q, TyLit (NumTyLit), TySynEqn (TySynEqn),
-                            Type (AppT, ConT, LitT, TupleT, VarT), newName)
+import Language.Haskell.TH (Dec, Exp (TupE, VarE), Name, Pat (TupP, VarP, WildP), Q, TyLit (NumTyLit),
+                            Type (AppT, LitT, TupleT, VarT), newName)
 
 import Data.Traversable (for)
 
@@ -59,117 +58,63 @@ list n =
 consType :: Word -> Q [Dec]
 consType n = do
   abc@(a:bcd) <- newNames
-  pure
-    [ TySynInstD
-       ''Cons
-       $ TySynEqn
-           [ VarT a
-           , tuple (n - 1) bcd
-           ]
-           (tuple n abc)
-    ]
+  [d| type instance Cons $(pure $ VarT a) $(pure $ tuple (n - 1) bcd) = $(pure $ tuple n abc) |]
 
 headType :: Word -> Q [Dec]
 headType n = do
   abc@(a:_) <- newNames
-  pure
-    [ TySynInstD
-        ''Head
-        $ TySynEqn
-            [tuple n abc]
-            (VarT a)
-    ]
+  [d| type instance Head $(pure $ tuple n abc) = $(pure $ VarT a) |]
 
 tailType :: Word -> Q [Dec]
 tailType n = do
   abc@(_:bcd) <- newNames
-  pure
-    [ TySynInstD
-        ''Tail
-        $ TySynEqn
-            [tuple n abc]
-            (tuple (n - 1) bcd)
-    ]
+  [d| type instance Tail $(pure $ tuple n abc) = $(pure $ tuple (n - 1) bcd) |]
 
 initType :: Word -> Q [Dec]
 initType n = do
   abc <- newNames
-  pure
-    [ TySynInstD
-        ''Init
-        $ TySynEqn
-            [tuple n abc]
-            (tuple (n - 1) abc)
-    ]
+  [d| type instance Init $(pure $ tuple n abc) = $(pure $ tuple (n - 1) abc) |]
 
 lastType :: Word -> Q [Dec]
 lastType n = do
   abc <- newNames
-  pure
-    [ TySynInstD
-        ''Last
-        $ TySynEqn
-            [tuple n abc]
-            (VarT $ abc Prelude.!! (fromIntegral n - 1))
-    ]
+  [d| type instance Last $(pure $ tuple n abc) = $(pure $ VarT $ abc Prelude.!! (fromIntegral n - 1)) |]
 
 lengthType :: Word -> Q [Dec]
 lengthType n = do
   abc <- newNames
-  pure
-    [ TySynInstD
-        ''Length
-        $ TySynEqn
-            [tuple n abc]
-            (LitT $ NumTyLit $ fromIntegral n)
-    ]
+  [d| type instance Length $(pure $ tuple n abc) = $(pure $ LitT $ NumTyLit $ fromIntegral n) |]
 
 hasHead'Instance :: Word -> Q [Dec]
 hasHead'Instance n = do
   abc@(a:_) <- newNames
-  pure
-    [ InstanceD
-        Nothing
-        []
-        (AppT (AppT (ConT ''HasHead') (tuple n abc)) (VarT a))
-        [FunD 'head' [Clause [TupP $ VarP a : replicate (fromIntegral n - 1) WildP] (NormalB $ VarE a) []]]
-    ]
+  [d| instance HasHead' $(pure $ tuple n abc) $(pure $ VarT a) where
+        head' $(pure $ TupP $ VarP a : replicate (fromIntegral n - 1) WildP) = $(pure $ VarE a)
+   |]
 
 hasTail'Instance :: Word -> Q [Dec]
 hasTail'Instance n = do
   abc@(_:bcd) <- newNames
   let bcd' = take (fromIntegral n - 1) bcd
-  pure
-    [ InstanceD
-        Nothing
-        []
-        (AppT (AppT (ConT ''HasTail') (tuple n abc)) (tuple (n - 1) bcd))
-        [FunD 'tail' [Clause [TupP $ WildP : (VarP <$> bcd')] (NormalB $ TupE $ VarE <$> bcd') []]]
-    ]
+  [d| instance HasTail' $(pure $ tuple n abc) $(pure $ tuple (n - 1) bcd) where
+        tail' $(pure $ TupP $ WildP : (VarP <$> bcd')) = $(pure $ TupE $ VarE <$> bcd')
+   |]
 
 hasInit'Instance :: Word -> Q [Dec]
 hasInit'Instance n = do
   abc <- newNames
   let abc' = take (fromIntegral n - 1) abc
-  pure
-    [ InstanceD
-        Nothing
-        []
-        (AppT (AppT (ConT ''HasInit') (tuple n abc)) (tuple (n - 1) abc))
-        [FunD 'init' [Clause [TupP $ (VarP <$> abc') ++ [WildP]] (NormalB $ TupE $ VarE <$> abc') []]]
-    ]
+  [d| instance HasInit' $(pure $ tuple n abc) $(pure $ tuple (n - 1) abc) where
+        init' $(pure $ TupP $ (VarP <$> abc') ++ [WildP]) = $(pure $ TupE $ VarE <$> abc')
+   |]
 
 hasLast'Instance :: Word -> Q [Dec]
 hasLast'Instance n = do
   abc <- newNames
   let c = abc Prelude.!! (fromIntegral n - 1)
-  pure
-    [ InstanceD
-        Nothing
-        []
-        (AppT (AppT (ConT ''HasLast') (tuple n abc)) (VarT c))
-        [FunD 'last' [Clause [TupP $ replicate (fromIntegral n - 1) WildP ++ [VarP c]] (NormalB $ VarE c) []]]
-    ]
+  [d| instance HasLast' $(pure $ tuple n abc) $(pure $ VarT c) where
+        last' $(pure $ TupP $ replicate (fromIntegral n - 1) WildP ++ [VarP c]) = $(pure $ VarE c)
+   |]
 
 hasCons'Instance :: Word -> Q [Dec]
 hasCons'Instance n = do
@@ -177,13 +122,9 @@ hasCons'Instance n = do
   let
     abc' = take (fromIntegral n) abc
     bcd' = take (fromIntegral n - 1) bcd
-  pure
-    [ InstanceD
-        Nothing
-        []
-        (AppT (AppT (AppT (ConT ''HasCons') (tuple n abc)) (VarT a)) (tuple (n - 1) bcd))
-        [FunD 'cons' [Clause [VarP a, TupP $ VarP <$> bcd'] (NormalB $ TupE $ VarE <$> abc') []]]
-    ]
+  [d| instance HasCons' $(pure $ tuple n abc) $(pure $ VarT a) $(pure $ tuple (n - 1) bcd) where
+        cons' $(pure $ VarP a) $(pure $ TupP $ VarP <$> bcd') = $(pure $ TupE $ VarE <$> abc')
+   |]
 
 hasUncons'Instance :: Word -> Q [Dec]
 hasUncons'Instance n = do
@@ -191,90 +132,44 @@ hasUncons'Instance n = do
   let
     abc' = take (fromIntegral n) abc
     bcd' = take (fromIntegral n - 1) bcd
-  pure
-    [ InstanceD
-        Nothing
-        []
-        (AppT (AppT (AppT (ConT ''HasUncons') (tuple n abc)) (VarT a)) (tuple (n - 1) bcd))
-        [FunD 'uncons' [Clause [TupP $ VarP <$> abc'] (NormalB $ TupE [VarE a, TupE $ VarE <$> bcd']) []]]
-    ]
+  [d| instance HasUncons' $(pure $ tuple n abc) $(pure $ VarT a) $(pure $ tuple (n - 1) bcd) where
+        uncons' $(pure $ TupP $ VarP <$> abc') = ($(pure $ VarE a), $(pure $ TupE $ VarE <$> bcd'))
+   |]
 
 hasHeadInstance :: Word -> Q [Dec]
 hasHeadInstance n = do
   abc <- newNames
-  pure
-    [ InstanceD
-        Nothing
-        []
-        (AppT (ConT ''HasHead) (tuple n abc))
-        []
-    ]
+  [d| instance HasHead $(pure $ tuple n abc) |]
 
 hasTailInstance :: Word -> Q [Dec]
 hasTailInstance n = do
   abc <- newNames
-  pure
-    [ InstanceD
-        Nothing
-        []
-        (AppT (ConT ''HasTail) (tuple n abc))
-        []
-    ]
+  [d| instance HasTail $(pure $ tuple n abc) |]
 
 hasInitInstance :: Word -> Q [Dec]
 hasInitInstance n = do
   abc <- newNames
-  pure
-    [ InstanceD
-        Nothing
-        []
-        (AppT (ConT ''HasInit) (tuple n abc))
-        []
-    ]
+  [d| instance HasInit $(pure $ tuple n abc) |]
 
 hasLastInstance :: Word -> Q [Dec]
 hasLastInstance n = do
   abc <- newNames
-  pure
-    [ InstanceD
-        Nothing
-        []
-        (AppT (ConT ''HasLast) (tuple n abc))
-        []
-    ]
+  [d| instance HasLast $(pure $ tuple n abc) |]
 
 hasConsInstance :: Word -> Q [Dec]
 hasConsInstance n = do
   a:bcd <- newNames
-  pure
-    [ InstanceD
-        Nothing
-        []
-        (AppT (AppT (ConT ''HasCons) (VarT a)) (tuple (n - 1) bcd))
-        []
-    ]
+  [d| instance HasCons $(pure $ VarT a) $(pure $ tuple (n - 1) bcd) |]
 
 hasUnconsInstance :: Word -> Q [Dec]
 hasUnconsInstance n = do
   abc <- newNames
-  pure
-    [ InstanceD
-        Nothing
-        []
-        (AppT (ConT ''HasUncons) (tuple n abc))
-        []
-    ]
+  [d| instance HasUncons $(pure $ tuple n abc) |]
 
 hasLengthInstance :: Word -> Q [Dec]
 hasLengthInstance n = do
   abc <- newNames
-  pure
-    [ InstanceD
-        Nothing
-        []
-        (AppT (ConT ''HasLength) (tuple n abc))
-        []
-    ]
+  [d| instance HasLength $(pure $ tuple n abc) |]
 
 reverseType :: Word -> Q [Dec]
 reverseType n = do
@@ -282,11 +177,7 @@ reverseType n = do
   let
     abc' = take (fromIntegral n) abc
     cba' = Prelude.reverse abc'
-  pure
-    [ TySynInstD
-        ''Reverse
-        (TySynEqn [tuple n abc] (tuple n cba'))
-    ]
+  [d| type instance Reverse $(pure $ tuple n abc) = $(pure $ tuple n cba') |]
 
 hasReverse'Instance :: Word -> Q [Dec]
 hasReverse'Instance n = do
@@ -294,81 +185,53 @@ hasReverse'Instance n = do
   let
     abc' = take (fromIntegral n) abc
     cba' = Prelude.reverse abc'
-  pure
-    [ InstanceD
-        Nothing
-        []
-        (AppT (AppT (ConT ''HasReverse') (tuple n abc)) (tuple n cba'))
-        [FunD 'reverse' [Clause [TupP $ VarP <$> abc'] (NormalB $ TupE $ VarE <$> cba') []]]
-    ]
+  [d| instance HasReverse' $(pure $ tuple n abc) $(pure $ tuple n cba') where
+        reverse' $(pure $ TupP $ VarP <$> abc') = $(pure $ TupE $ VarE <$> cba')
+   |]
 
 hasReverseInstance :: Word -> Q [Dec]
 hasReverseInstance n = do
   abc <- newNames
-  pure
-    [ InstanceD
-        Nothing
-        []
-        (AppT (ConT ''HasReverse) (tuple n abc))
-        []
-    ]
+  [d| instance HasReverse $(pure $ tuple n abc) |]
 
 atTypes :: Word -> Q [Dec]
 atTypes n =
-  for [0 .. n - 1] atType
+  mconcat <$> for [0 .. n - 1] atType
   where
-    atType :: Word -> Q Dec
+    atType :: Word -> Q [Dec]
     atType i = do
       abc <- newNames
       let
-        ii :: Int
-        ii = fromIntegral i
-        iii :: Integer
-        iii = fromIntegral i
-      pure $ TySynInstD ''(!!) (TySynEqn [tuple n abc, LitT $ NumTyLit iii] (VarT $ abc Prelude.!! ii))
+        ii = fromIntegral i :: Int
+        iii = fromIntegral i :: Integer
+      [d| type instance $(pure $ tuple n abc) !! $(pure $ LitT $ NumTyLit iii) = $(pure $ VarT $ abc Prelude.!! ii) |]
 
 hasAt'Instances :: Word -> Q [Dec]
 hasAt'Instances n =
-  for [0 .. n - 1] hasAt'Instance
+  mconcat <$> for [0 .. n - 1] hasAt'Instance
   where
-    hasAt'Instance :: Word -> Q Dec
+    hasAt'Instance :: Word -> Q [Dec]
     hasAt'Instance i = do
       abc <- newNames
       let
-        iii :: Integer
-        iii = fromIntegral i
+        iii = fromIntegral i :: Integer
         x = abc Prelude.!! (fromIntegral i)
-      pure $
-        InstanceD
-          Nothing
-          []
-          (AppT (AppT (AppT (ConT ''HasAt') (tuple n abc)) (LitT $ NumTyLit iii)) (VarT x))
-          [ FunD
-              '(!!!)
-              [ Clause
-                  [TupP $ overwrite i (VarP x) $ replicate (fromIntegral n) WildP, WildP]
-                  (NormalB (VarE x))
-                  []
-              ]
-          ]
+      [d| instance HasAt' $(pure $ tuple n abc) $(pure $ LitT $ NumTyLit iii) $(pure $ VarT x) where
+            $(pure $ TupP $ overwrite i (VarP x) $ replicate (fromIntegral n) WildP) !!! $(pure $ WildP) = $(pure $ VarE x)
+       |]
     overwrite :: Word -> a -> [a] -> [a]
     overwrite 0 a (_:xs) = a : xs
     overwrite i a (x:xs) = x : overwrite (i - 1) a xs
-    overwrite _ _ [] = error "hasAt'Instances.overwrite"
+    overwrite _ _ []     = error "hasAt'Instances.overwrite"
 
 hasAtInstances :: Word -> Q [Dec]
 hasAtInstances n =
-  for [0 .. n - 1] hasAtInstance
+  mconcat <$> for [0 .. n - 1] hasAtInstance
   where
-    hasAtInstance :: Word -> Q Dec
+    hasAtInstance :: Word -> Q [Dec]
     hasAtInstance i = do
       abc <- newNames
-      pure $
-        InstanceD
-          Nothing
-          []
-          (AppT (AppT (ConT ''HasAt) (tuple n abc)) (LitT $ NumTyLit $ fromIntegral i))
-          []
+      [d| instance HasAt $(pure $ tuple n abc) $(pure $ LitT $ NumTyLit $ fromIntegral i) |]
 
 newNames :: Q [Name]
 newNames = for ['a' ..] $ newName . (:[])
