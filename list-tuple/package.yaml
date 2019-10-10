@@ -13,7 +13,7 @@ extra-source-files:
 synopsis: List-like operations for tuples
 category: Data
 
-description: Please see the README on GitHub at <https://github.com/kakkun61/tuple#readme>
+description: List-like operations for tuples
 
 dependencies:
 - base

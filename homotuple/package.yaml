@@ -13,8 +13,7 @@ extra-source-files:
 synopsis: Homotuple, all whose elements are the same type
 category: Data
 
-
-description: Please see the README on GitHub at <https://github.com/kakkun61/homotuple#readme>
+description: Homotuple, all whose elements are the same type
 
 dependencies:
 - base

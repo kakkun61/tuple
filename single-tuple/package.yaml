@@ -13,8 +13,7 @@ extra-source-files:
 synopsis: a class for single tuple implementations
 category: Data
 
-
-description: Please see the README on GitHub at <https://github.com/kakkun61/tuple#readme>
+description: a class for single tuple implementations
 
 dependencies:
 - base
