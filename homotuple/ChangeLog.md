@@ -1,3 +1,7 @@
 # Changelog for homotuple
 
-## Unreleased changes
+## 0.1.0.0
+
+2019.10.10
+
+Release.
