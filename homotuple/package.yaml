@@ -16,7 +16,7 @@ category: Data
 description: Homotuple, all whose elements are the same type
 
 dependencies:
-- base
+- base >= 4.12 && < 4.13
 
 ghc-options:
 - -Wall
@@ -41,6 +41,6 @@ when:
 library:
   source-dirs: src
   dependencies:
-  - OneTuple
-  - Only
-  - single-tuple
+  - OneTuple >= 0.2 && < 0.3
+  - Only >= 0.1 && < 0.2
+  - single-tuple >= 0.1 && < 0.2

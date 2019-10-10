@@ -16,9 +16,9 @@ category: Data
 description: a class for single tuple implementations
 
 dependencies:
-- base
-- OneTuple
-- Only
+- base >= 4.12 && < 4.13
+- OneTuple >= 0.2 && < 0.3
+- Only >= 0.1 && < 0.2
 
 ghc-options:
 - -Wall

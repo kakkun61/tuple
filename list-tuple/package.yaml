@@ -16,7 +16,7 @@ category: Data
 description: List-like operations for tuples
 
 dependencies:
-- base
+- base >= 4.12 && < 4.13
 
 ghc-options:
 - -Wall
@@ -37,9 +37,9 @@ ghc-options:
 library:
   source-dirs: src
   dependencies:
-  - single-tuple
-  - OneTuple
-  - Only
+  - single-tuple >= 0.1 && < 0.2
+  - OneTuple >= 0.2 && < 0.3
+  - Only >= 0.1 && < 0.2
 
 tests:
   test:
