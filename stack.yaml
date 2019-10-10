@@ -4,6 +4,3 @@ packages:
 - homotuple
 - list-tuple
 - single-tuple
-
-extra-deps:
-- strip-ansi-escape-0.1.0.0
