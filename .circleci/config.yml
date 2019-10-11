@@ -1,0 +1,52 @@
+version: 2.1
+jobs:
+  build:
+    docker:
+      - image: fpco/stack-build:lts
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - stack-v1-root-{{ checksum "stack-ghc-8.2.yaml" }}-{{ checksum "stack-ghc-8.4.yaml" }}-{{ checksum "stack-ghc-8.6.yaml" }}
+            - stack-v1-root-
+      - restore_cache:
+          keys:
+            - stack-v1-single-tuple-{{ checksum "stack-ghc-8.2.yaml" }}-{{ checksum "stack-ghc-8.4.yaml" }}-{{ checksum "stack-ghc-8.6.yaml" }}-{{ checksum "single-tuple/package.yaml" }}
+            - stack-v1-single-tuple-
+      - restore_cache:
+          keys:
+            - stack-v1-list-tuple-{{ checksum "stack-ghc-8.2.yaml" }}-{{ checksum "stack-ghc-8.4.yaml" }}-{{ checksum "stack-ghc-8.6.yaml" }}-{{ checksum "list-tuple/package.yaml" }}
+            - stack-v1-list-tuple-
+      - restore_cache:
+          keys:
+            - stack-v1-homotuple-{{ checksum "stack-ghc-8.2.yaml" }}-{{ checksum "stack-ghc-8.4.yaml" }}-{{ checksum "stack-ghc-8.6.yaml" }}-{{ checksum "homotuple/package.yaml" }}
+            - stack-v1-homotuple-
+      - run:
+          command: stack --stack-yaml stack-ghc-8.6.yaml setup
+      - run:
+          command: stack --stack-yaml stack-ghc-8.6.yaml test
+      - run:
+          command: stack --stack-yaml stack-ghc-8.4.yaml setup
+      - run:
+          command: stack --stack-yaml stack-ghc-8.4.yaml test
+      - run:
+          command: stack --stack-yaml stack-ghc-8.2.yaml setup
+      - run:
+          command: stack --stack-yaml stack-ghc-8.2.yaml build # 'stack --stack-yaml stack-ghc-8.2.yaml test' causes GHC panic.
+      - save_cache:
+          key: stack-v1-root-{{ checksum "stack-ghc-8.2.yaml" }}-{{ checksum "stack-ghc-8.4.yaml" }}-{{ checksum "stack-ghc-8.6.yaml" }}
+          paths:
+            - "/root/.stack"
+            - ".stack-work"
+      - save_cache:
+          key: stack-v1-single-tuple-{{ checksum "stack-ghc-8.2.yaml" }}-{{ checksum "stack-ghc-8.4.yaml" }}-{{ checksum "stack-ghc-8.6.yaml" }}-{{ checksum "single-tuple/package.yaml" }}
+          paths:
+            - "single-tuple/.stack-work"
+      - save_cache:
+          key: stack-v1-list-tuple-{{ checksum "stack-ghc-8.2.yaml" }}-{{ checksum "stack-ghc-8.4.yaml" }}-{{ checksum "stack-ghc-8.6.yaml" }}-{{ checksum "list-tuple/package.yaml" }}
+          paths:
+            - "list-tuple/.stack-work"
+      - save_cache:
+          key: stack-v1-homotuple-{{ checksum "stack-ghc-8.2.yaml" }}-{{ checksum "stack-ghc-8.4.yaml" }}-{{ checksum "stack-ghc-8.6.yaml" }}-{{ checksum "homotuple/package.yaml" }}
+          paths:
+            - "homotuple/.stack-work"
