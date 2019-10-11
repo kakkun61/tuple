@@ -1,7 +1,7 @@
 name: list-tuple
 version: 0.1.1.0
 github: "kakkun61/tuple"
-license: Apache
+license: Apache-2.0
 author: "Kazuki Okamoto"
 maintainer: "kazuki.okamoto@kakkun61.com"
 copyright: "2019 Kazuki Okamoto"
