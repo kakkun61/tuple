@@ -16,7 +16,7 @@ category: Data
 description: Homotuple, all whose elements are the same type
 
 dependencies:
-- base >= 4.10 && < 4.13
+- base >= 4.10 && < 4.14
 
 ghc-options:
 - -Wall

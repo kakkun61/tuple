@@ -17,7 +17,7 @@ category: Data
 description: List-like operations for tuples
 
 dependencies:
-- base >= 4.10 && < 4.13
+- base >= 4.10 && < 4.14
 
 ghc-options:
 - -Wall
