@@ -1,5 +1,5 @@
 name: list-tuple
-version: 0.1.0.0
+version: 0.1.1.0
 github: "kakkun61/tuple"
 license: Apache
 author: "Kazuki Okamoto"
@@ -9,6 +9,7 @@ copyright: "2019 Kazuki Okamoto"
 extra-source-files:
 - README.md
 - ChangeLog.md
+- template/*.hs
 
 synopsis: List-like operations for tuples
 category: Data
