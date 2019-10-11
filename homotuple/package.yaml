@@ -16,7 +16,7 @@ category: Data
 description: Homotuple, all whose elements are the same type
 
 dependencies:
-- base >= 4.12 && < 4.13
+- base >= 4.10 && < 4.13
 
 ghc-options:
 - -Wall
@@ -25,16 +25,18 @@ ghc-options:
 - -Wincomplete-record-updates
 - -Wmonomorphism-restriction
 - -Wmissing-exported-signatures
-- -Wmissing-export-lists
 - -Wmissing-home-modules
 - -Wmissing-import-lists
 - -Widentities
 - -Wredundant-constraints
-- -Wpartial-fields
 - -Wno-name-shadowing
 
 when:
-- condition: impl(ghc >= 8.6.1)
+- condition: impl(ghc >= 8.4.0)
+  ghc-options:
+  - -Wmissing-export-lists
+  - -Wpartial-fields
+- condition: impl(ghc >= 8.6.0)
   default-extensions:
   - NoStarIsType
 

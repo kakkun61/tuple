@@ -16,7 +16,7 @@ category: Data
 description: List-like operations for tuples
 
 dependencies:
-- base >= 4.12 && < 4.13
+- base >= 4.10 && < 4.13
 
 ghc-options:
 - -Wall
@@ -25,14 +25,18 @@ ghc-options:
 - -Wincomplete-record-updates
 - -Wmonomorphism-restriction
 - -Wmissing-exported-signatures
-- -Wmissing-export-lists
 - -Wmissing-home-modules
 - -Wmissing-import-lists
 - -Widentities
 - -Wredundant-constraints
-- -Wpartial-fields
 - -Wno-name-shadowing
 - -Wno-unticked-promoted-constructors
+
+when:
+- condition: impl(ghc >= 8.4.0)
+  ghc-options:
+  - -Wmissing-export-lists
+  - -Wpartial-fields
 
 library:
   source-dirs: src
@@ -49,7 +53,6 @@ tests:
     - -threaded
     - -rtsopts
     - -with-rtsopts=-N
-    - -Wno-missing-export-lists
     - -Wno-missing-import-lists
     dependencies:
     - list-tuple
@@ -59,6 +62,10 @@ tests:
     - text
     - Only
     - single-tuple
+    when:
+    - condition: impl(ghc >= 8.4.0)
+      ghc-options:
+      - -Wno-missing-export-lists
 
 custom-setup:
   dependencies:

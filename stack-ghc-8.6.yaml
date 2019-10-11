@@ -1,0 +1,6 @@
+resolver: lts-14.8
+
+packages:
+- homotuple
+- list-tuple
+- single-tuple
