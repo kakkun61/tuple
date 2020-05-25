@@ -55,7 +55,6 @@ library
                    Data.Tuple.List.Identity
                    Data.Tuple.List.OneTuple
                    Data.Tuple.List.Only
-  other-modules:   Paths_list_tuple
   hs-source-dirs:  src
   build-depends:   OneTuple >=0.2 && <0.3,
                    Only >=0.1 && <0.2,
@@ -69,7 +68,6 @@ test-suite test
   main-is:            Spec.hs
   other-modules:      Data.Tuple.List.IdentitySpec
                       Data.Tuple.ListSpec
-                      Paths_list_tuple
   hs-source-dirs:     test
   ghc-options:        -threaded
                       -rtsopts

@@ -45,7 +45,6 @@ common common
 library
   import:          common
   exposed-modules: Data.Tuple.Single
-  other-modules:   Paths_single_tuple
   hs-source-dirs:  src
   if impl(ghc >= 8.4.0)
     ghc-options: -Wmissing-export-lists
@@ -55,7 +54,6 @@ test-suite test
   type:               exitcode-stdio-1.0
   main-is:            Spec.hs
   other-modules:      Data.Tuple.SingleSpec
-                      Paths_single_tuple
   hs-source-dirs:     test
   ghc-options:        -threaded
                       -rtsopts

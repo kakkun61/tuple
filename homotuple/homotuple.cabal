@@ -27,7 +27,6 @@ library
                         Data.Tuple.Homotuple.Identity
                         Data.Tuple.Homotuple.OneTuple
                         Data.Tuple.Homotuple.Only
-  other-modules:        Paths_homotuple
   hs-source-dirs:       src
   ghc-options:          -Wall
                         -Wcompat
