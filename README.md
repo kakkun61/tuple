@@ -1,3 +1,3 @@
 # single-tuple, list-tuple, homotuple packages
 
-[![CircleCI](https://circleci.com/gh/kakkun61/tuple/tree/master.svg?style=svg)](https://circleci.com/gh/kakkun61/tuple/tree/master)
+[![GitHub Actions](https://github.com/kakkun61/tuple/workflows/build/badge.svg?branch=master)](https://github.com/kakkun61/tuple/actions?query=workflow%3Abuild)
