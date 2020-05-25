@@ -5,8 +5,8 @@ version:        0.1.1.0
 synopsis:       Homotuple, all whose elements are the same type
 description:    Homotuple, all whose elements are the same type
 category:       Data
-homepage:       https://github.com/kakkun61/homotuple
-bug-reports:    https://github.com/kakkun61/homotuple/issues
+homepage:       https://github.com/kakkun61/tuple
+bug-reports:    https://github.com/kakkun61/tuple/issues
 author:         Kazuki Okamoto
 maintainer:     kazuki.okamoto@kakkun61.com
 copyright:      2019 Kazuki Okamoto
