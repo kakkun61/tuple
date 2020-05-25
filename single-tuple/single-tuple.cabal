@@ -5,7 +5,7 @@ version:        0.1.1.0
 synopsis:       a class for single tuple implementations
 description:    a class for single tuple implementations
 category:       Data
-homepage:       https://github.com/kakkun61/tuple#readme
+homepage:       https://github.com/kakkun61/tuple
 bug-reports:    https://github.com/kakkun61/tuple/issues
 author:         Kazuki Okamoto
 maintainer:     kazuki.okamoto@kakkun61.com
