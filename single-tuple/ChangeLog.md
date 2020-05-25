@@ -1,5 +1,11 @@
 # Changelog for single-tuple
 
+## 0.1.1.0
+
+2020.05.26
+
+Relaxing the upper bound for the base package.
+
 ## 0.1.0.0
 
 2019.10.10

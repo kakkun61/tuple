@@ -1,7 +1,7 @@
 cabal-version: 1.12
 
 name:           homotuple
-version:        0.1.0.0
+version:        0.1.1.0
 synopsis:       Homotuple, all whose elements are the same type
 description:    Homotuple, all whose elements are the same type
 category:       Data
