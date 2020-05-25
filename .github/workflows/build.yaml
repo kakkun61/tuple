@@ -1,0 +1,48 @@
+name: build
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        ghc: [latest, '8.10', '8.8', '8.6']
+        experimental: [false]
+        package: [single-tuple, list-tuple, homotuple]
+        do: [build, test]
+        exclude:
+          - package: single-tuple
+            do: build
+          - package: list-tuple
+            do: build
+          - package: homotuple
+            do: test
+        # include:
+        #   - package: single-tuple
+        #     do: test
+        #   - package: list-tuple
+        #     do: test
+        #   - package: homotuple
+        #     do: build
+    continue-on-error: ${{ matrix.experimental }}
+    name: Build/test ${{ matrix.package }} with GHC ${{ matrix.ghc }}
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-haskell@v1
+        with:
+          ghc-version: ${{ matrix.ghc }}
+      - uses: actions/cache@v1
+        with:
+          path: ~/.cabal/packages
+          key: packages-${{ matrix.ghc }}
+      - uses: actions/cache@v1
+        with:
+          path: ~/.cabal/store
+          key: store-${{ matrix.ghc }}
+      - uses: actions/cache@v1
+        with:
+          path: dist-newstyle
+          key: dist-newstyle-${{ matrix.ghc }}
+      - run: cabal v2-build --only-dependencies ${{ matrix.package }}
+      - run: cabal v2-${{ matrix.do }} ${{ matrix.package }}
