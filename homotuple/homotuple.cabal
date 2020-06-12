@@ -17,6 +17,8 @@ build-type:     Custom
 extra-source-files:
     README.md
     ChangeLog.md
+    template/Homotuple.hs
+    template/HomotupleItem.hs
 
 source-repository head
   type: git
