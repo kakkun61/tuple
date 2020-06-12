@@ -65,8 +65,8 @@ preProcessListTuple _ _ = do
       | otherwise = [line]
 
     embed :: Word -> [String] -> [String] -> [String]
-    embed l template templateAt
-      | l >= 3 = concatMap go template
+    embed l templateItem templateAt
+      | l >= 3 = concatMap go templateItem
       | otherwise = error "length must be larger than or equal to 3"
       where
         go "" = [""]
