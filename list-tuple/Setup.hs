@@ -24,19 +24,20 @@ preProcessListTuple _ _ = do
     file = "List.hs"
     srcPath = dir ++ "/" ++ file
     templatePath = "template/List.hs"
+    templateItemPath = "template/ListItem.hs"
     templateAtPath = "template/ListAt.hs"
   tempPath <-
-    withFile srcPath ReadMode $ \src -> do
+    withFile templatePath ReadMode $ \template -> do
       tempDir <- (++ "/list-tuple") <$> getTemporaryDirectory
       createDirectoryIfMissing True tempDir
       (tempPath, temp) <- openTempFile tempDir file
       putStrLn $ "temporaly file: " ++ tempPath
-      hSetNewlineMode src noNewlineTranslation
+      hSetNewlineMode template noNewlineTranslation
       hSetNewlineMode temp noNewlineTranslation
       hSetNewlineMode stdin noNewlineTranslation
-      template <- lines <$> readFile templatePath
+      templateItem <- lines <$> readFile templateItemPath
       templateAt <- lines <$> readFile templateAtPath
-      loop src temp template templateAt
+      loop template temp templateItem templateAt
       hClose temp
       pure tempPath
   copyFile tempPath srcPath
@@ -44,23 +45,23 @@ preProcessListTuple _ _ = do
   pure emptyHookedBuildInfo
   where
     loop :: Handle -> Handle -> [String] -> [String] -> IO ()
-    loop src temp template templateAt =
+    loop template temp templateItem templateAt =
       go
       where
         go = do
-          eof <- hIsEOF src
+          eof <- hIsEOF template
           if eof
             then pure ()
             else do
-              line <- hGetLine src
-              for_ (preprocess line template templateAt) (hPutStrLn temp)
+              line <- hGetLine template
+              for_ (preprocess line templateItem templateAt) (hPutStrLn temp)
               go
 
     preprocess :: String -> [String] -> [String] -> [String]
-    preprocess line template templateAt
+    preprocess line templateItem templateAt
       | Just rest <- stripPrefix "---- embed " line
       , let n = read $ takeWhile isDigit rest
-      = embed n template templateAt
+      = embed n templateItem templateAt
       | otherwise = [line]
 
     embed :: Word -> [String] -> [String] -> [String]
@@ -89,22 +90,21 @@ preProcessListTuple _ _ = do
           | (s, rest) <- span ((&&) <$> (/= '<') <*> (/= '-')) t = [s ++ Prelude.head (go rest)]
         n = fromIntegral l
         m = n - 1
-        tuple = paren $ take n abc
-        tail = paren $ take m $ Prelude.tail abc
-        init = paren $ take m abc
-        last = [last']
+        tuple = paren $ take n i012
+        tail = paren $ take m $ Prelude.tail i012
+        init = paren $ take m i012
+        last = i012 !! m
         length = show l
-        tupleHead = paren $ take n $ 'a' : unders
-        tupleTail = paren $ take n $ '_' : Prelude.tail abc
-        tupleInit = paren $ Prelude.reverse $ '_' : zy
-        tupleLast = paren $ Prelude.reverse $ take n $ last' : unders
+        tupleHead = paren $ take n $ "i0" : unders
+        tupleTail = paren $ take n $ "_" : Prelude.tail i012
+        tupleInit = paren $ Prelude.reverse $ "_" : zy
+        tupleLast = paren $ Prelude.reverse $ take n $ last : unders
         cons = "(" ++ replicate m ',' ++ ")"
-        paren xs = "(" ++ intercalate ", " ((: []) <$> xs) ++ ")"
-        abc = ['a' ..]
-        unders = repeat '_'
-        last' = abc !! m
-        zy = Prelude.reverse (take m abc)
-        zyx = Prelude.reverse (take n abc)
+        paren xs = "(" ++ intercalate ", " xs ++ ")"
+        i012 = ('i':) . show <$> [0 ..]
+        unders = repeat "_"
+        zy = Prelude.reverse (take m i012)
+        zyx = Prelude.reverse (take n i012)
         reverse = paren $ zyx
 
         embedAt :: Word -> [String]
@@ -119,5 +119,5 @@ preProcessListTuple _ _ = do
               | Just rest <- stripPrefix "<" t = "<" ++ go rest
               | (s, rest) <- span (/= '<') t = s ++ go rest
             at' = fromIntegral at
-            item = [abc !! at']
-            tupleAt = paren $ take at' unders ++ item ++ take (n - at' - 1) unders
+            item = i012 !! at'
+            tupleAt = paren $ take at' unders ++ [item] ++ take (n - at' - 1) unders
