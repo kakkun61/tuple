@@ -1,5 +1,11 @@
 # Changelog for homotuple
 
+## 0.1.2.0
+
+2020.06.13
+
+Add implementations until 62-tuple.
+
 ## 0.1.1.0
 
 2020.05.26
