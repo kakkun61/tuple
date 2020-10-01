@@ -20,7 +20,7 @@
 -- Stability   :  experimental
 -- Portability :  GHC
 --
--- Homotuples, whoes items are the same type or which are lists with type-level length.
+-- Homotuples, whose items are the same type or which are lists with type-level length.
 
 module Data.Tuple.Homotuple
   ( Homotuple
@@ -33,7 +33,7 @@ module Data.Tuple.Homotuple
   , pure
     -- * Monad-like
   , (>>=)
-    -- * Semigoupe-like
+    -- * Semigroupe-like
   , (<>)
     -- * Monoid-like
   , pattern Empty

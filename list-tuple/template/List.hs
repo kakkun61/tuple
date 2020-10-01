@@ -30,7 +30,7 @@
 -- This is a bit tricky of classes because Haskell does not have 1-tuples.
 -- If you use 'Data.Tuple.Only.Only', 'Data.Tuple.OneTuple.OneTuple' or 'Data.Functor.Identity.Identity' as 1-tuples,
 -- import @Data.Tuple.List.Only@, @Data.Tuple.List.OneTuple@ or @Data.Tuple.List.Identity@ respectively
--- and classes without a prime (dash) symbol, for examle 'HasHead'', are useful,
+-- and classes without a prime (dash) symbol, for example 'HasHead'', are useful,
 -- you can also use classes with a prime (dash) symbol.
 -- If you use 'Data.Tuple.Single.Single' class for polymorphic 1-tuples, you should use classes with a prime (dash) symbol.
 
@@ -44,7 +44,7 @@ module Data.Tuple.List
   , Init
   , Length
     -- ** Type classes
-    -- This clases are for all n-tuples including abstract 1-tuples, 2-tuples.
+    -- These classes are for all n-tuples including abstract 1-tuples, 2-tuples.
   , HasHead' (..)
   , HasLast' (..)
   , HasTail' (..)
@@ -52,7 +52,7 @@ module Data.Tuple.List
   , HasCons' (..)
   , HasUncons' (..)
     -- ** More concrete type classes
-    -- This classes are for n-tuples (n ≦ 2) and for concrete 1-tuples, 2-tupes.
+    -- These classes are for n-tuples (n ≦ 2) and for concrete 1-tuples, 2-tuples.
   , HasHead (..)
   , HasLast (..)
   , HasTail (..)
@@ -64,7 +64,7 @@ module Data.Tuple.List
   , pattern Null
   , pattern Cons'
   , pattern Cons
-    -- * List transfomations
+    -- * List transformations
   , Reverse
   , HasReverse (..)
   , HasReverse' (..)
