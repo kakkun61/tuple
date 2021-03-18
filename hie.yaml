@@ -1,0 +1,16 @@
+cradle:
+  cabal:
+    - path: "homotuple/src"
+      component: "lib:homotuple"
+
+    - path: "list-tuple/src"
+      component: "lib:list-tuple"
+
+    - path: "list-tuple/test"
+      component: "list-tuple:test:test"
+
+    - path: "single-tuple/src"
+      component: "lib:single-tuple"
+
+    - path: "single-tuple/test"
+      component: "single-tuple:test:test"
