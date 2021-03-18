@@ -1,5 +1,11 @@
 # Changelog for homotuple
 
+## 0.2.0.0
+
+2021.03.19
+
+Remove utility constraints.
+
 ## 0.1.2.1
 
 2020.06.13
