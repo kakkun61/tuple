@@ -37,9 +37,6 @@ module Data.Tuple.Homotuple
   , (<>)
     -- * Monoid-like
   , pattern Empty
-    -- * Utility constraints
-  , IsHomolisttuple
-  , IsHomotupleItem
     -- * For implementers
   , errorLengthMismatch
   ) where
@@ -194,23 +191,18 @@ instance IsList (Proxy a) where
 errorLengthMismatch :: HasCallStack => a
 errorLengthMismatch = error "length mismatch"
 
--- Utility constraints
-
-type IsHomolisttuple (n :: Nat) a = IsList (Homotuple n a)
-type IsHomotupleItem (n :: Nat) a = a ~ Item (Homotuple n a)
-
 -- List-like
 
-replicate :: forall (n :: Nat) a. (IsHomolisttuple n a, IsHomotupleItem n a, KnownNat n) => a -> Homotuple n a
+replicate :: forall (n :: Nat) a. (IsList (Homotuple n a), a ~ Item (Homotuple n a), KnownNat n) => a -> Homotuple n a
 replicate = fromList . L.replicate (fromInteger $ natVal (Proxy :: Proxy n))
 
 -- Functor-like
 
 (<$>)
-  :: ( IsHomolisttuple n a
-     , IsHomolisttuple n b
-     , IsHomotupleItem n a
-     , IsHomotupleItem n b
+  :: ( IsList (Homotuple n a)
+     , IsList (Homotuple n b)
+     , a ~ Item (Homotuple n a)
+     , b ~ Item (Homotuple n b)
      )
   => (a -> b) -> Homotuple n a -> Homotuple n b
 f <$> t = fromList $ L.map f $ toList t
@@ -218,12 +210,12 @@ f <$> t = fromList $ L.map f $ toList t
 -- Applicative-like
 
 (<*>)
-  :: ( IsHomolisttuple n0 (a -> b)
-     , IsHomolisttuple n1 a
-     , IsHomolisttuple (n0 * n1) b
-     , IsHomotupleItem n0 (a -> b)
-     , IsHomotupleItem n1 a
-     , IsHomotupleItem (n0 * n1) b
+  :: ( IsList (Homotuple n0 (a -> b))
+     , IsList (Homotuple n1 a)
+     , IsList (Homotuple (n0 * n1) b)
+     , (a -> b) ~ Item (Homotuple n0 (a -> b))
+     , a ~ Item (Homotuple n1 a)
+     , b ~ Item (Homotuple (n0 * n1) b)
      )
   => Homotuple n0 (a -> b) -> Homotuple n1 a -> Homotuple (n0 * n1) b
 f <*> t = fromList $ toList f A.<*> toList t
@@ -234,12 +226,12 @@ pure = wrap
 -- Monad-like
 
 (>>=)
-  :: ( IsHomolisttuple n0 a
-     , IsHomolisttuple n1 b
-     , IsHomolisttuple (n0 * n1) b
-     , IsHomotupleItem n0 a
-     , IsHomotupleItem n1 b
-     , IsHomotupleItem (n0 * n1) b
+  :: ( IsList (Homotuple n0 a)
+     , IsList (Homotuple n1 b)
+     , IsList (Homotuple (n0 * n1) b)
+     , a ~ Item (Homotuple n0 a)
+     , b ~ Item (Homotuple n1 b)
+     , b ~ Item (Homotuple (n0 * n1) b)
      )
   => Homotuple n0 a -> (a -> Homotuple n1 b) -> Homotuple (n0 * n1) b
 m >>= f = fromList $ toList m M.>>= (toList . f)
@@ -247,12 +239,12 @@ m >>= f = fromList $ toList m M.>>= (toList . f)
 -- Semigroup-like
 
 (<>)
-  :: ( IsHomolisttuple n0 a
-     , IsHomolisttuple n1 a
-     , IsHomolisttuple (n0 + n1) a
-     , IsHomotupleItem n0 a
-     , IsHomotupleItem n1 a
-     , IsHomotupleItem (n0 + n1) a
+  :: ( IsList (Homotuple n0 a)
+     , IsList (Homotuple n1 a)
+     , IsList (Homotuple (n0 + n1) a)
+     , a ~ Item (Homotuple n0 a)
+     , a ~ Item (Homotuple n1 a)
+     , a ~ Item (Homotuple (n0 + n1) a)
      )
   => Homotuple n0 a
   -> Homotuple n1 a
