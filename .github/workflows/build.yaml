@@ -26,7 +26,7 @@ jobs:
         #   - package: homotuple
         #     do: build
     continue-on-error: ${{ matrix.experimental }}
-    name: Build/test ${{ matrix.package }} with GHC ${{ matrix.ghc }}
+    name: ${{ matrix.do }} ${{ matrix.package }} with GHC ${{ matrix.ghc }}
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-haskell@v1
