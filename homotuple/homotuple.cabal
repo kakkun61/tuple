@@ -26,9 +26,9 @@ source-repository head
 
 custom-setup
   setup-depends:
-      Cabal
-    , base
-    , directory
+      Cabal,
+      base,
+      directory
 
 library
   exposed-modules:      Data.Tuple.Homotuple
@@ -48,7 +48,7 @@ library
                         -Widentities
                         -Wredundant-constraints
                         -Wno-name-shadowing
-  build-depends:        base >=4.10 && <4.15,
+  build-depends:        base >=4.10 && <5,
                         OneTuple >=0.2 && <0.3,
                         Only >=0.1 && <0.2,
                         single-tuple >=0.1 && <0.2

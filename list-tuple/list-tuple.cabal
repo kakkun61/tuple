@@ -26,7 +26,7 @@ source-repository head
   location: https://github.com/kakkun61/tuple
 
 common common
-  build-depends:    base >=4.10 && <4.15
+  build-depends:    base >=4.10 && <5
   ghc-options:      -Wall
                     -Wcompat
                     -Wincomplete-uni-patterns
@@ -46,9 +46,9 @@ common common
 
 custom-setup
   setup-depends:
-      Cabal
-    , base
-    , directory
+      Cabal,
+      base,
+      directory
 
 library
   import:          common
