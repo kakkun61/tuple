@@ -7,7 +7,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        ghc: [latest, '8.10', '8.8', '8.6']
+        ghc: [latest, '9.0', '8.10', '8.8', '8.6']
         experimental: [false]
         package: [single-tuple, list-tuple, homotuple]
         do: [build, test]
