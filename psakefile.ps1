@@ -1,6 +1,6 @@
 Properties {
     $subpackages = "homotuple", "list-tuple", "single-tuple"
-    $excludedPaths = "*\.stack-work\*"
+    $excludedPaths = "*\dist-newstyle\*"
     $crlfFiles = "*.ps1", "TAGS"
 }
 
@@ -31,7 +31,7 @@ Task Lint {
 }
 
 Task Eol {
-    @(Get-ChildItem -File -Exclude ".stack-work" .) + (Get-ChildItem -Recurse -File $subpackages) `
+    @(Get-ChildItem -File -Exclude "dist-newstyle" .) + (Get-ChildItem -Recurse -File $subpackages) `
       | Where-Object { `
           (NotLikeAny-Object -Target $_.FullName -Patterns $ExcludedPaths) `
           -and (NotLikeAny-Object -Target $_.Name -Patterns $CrlfFiles) `
