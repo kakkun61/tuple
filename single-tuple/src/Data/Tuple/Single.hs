@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP             #-}
 {-# LANGUAGE PatternSynonyms #-}
 {-# LANGUAGE Safe            #-}
 {-# LANGUAGE ViewPatterns    #-}
@@ -21,6 +22,12 @@ module Data.Tuple.Single
 import Data.Functor.Identity (Identity (Identity, runIdentity))
 import Data.Tuple.OneTuple   (OneTuple (OneTuple), only)
 import Data.Tuple.Only       (Only (Only, fromOnly))
+
+#if MIN_VERSION_ghc_prim(0,7,0)
+import GHC.Tuple (Solo (Solo))
+#else
+import GHC.Tuple (Unit (Unit))
+#endif
 
 class Single t where
   wrap :: a -> t a
@@ -47,3 +54,17 @@ instance Single OneTuple where
   unwrap = only
 
 {-# COMPLETE Single :: OneTuple #-}
+
+#if MIN_VERSION_ghc_prim(0,7,0)
+instance Single Solo where
+  wrap = Solo
+  unwrap (Solo a) = a
+
+{-# COMPLETE Single :: Solo #-}
+#else
+instance Single Unit where
+  wrap = Unit
+  unwrap (Unit a) = a
+
+{-# COMPLETE Single :: Unit #-}
+#endif
