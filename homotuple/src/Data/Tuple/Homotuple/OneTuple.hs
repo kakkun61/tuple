@@ -1,6 +1,8 @@
-{-# LANGUAGE DataKinds    #-}
-{-# LANGUAGE Trustworthy  #-}
-{-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE DataKinds            #-}
+{-# LANGUAGE PatternSynonyms      #-}
+{-# LANGUAGE Trustworthy          #-}
+{-# LANGUAGE TypeFamilies         #-}
+{-# LANGUAGE TypeSynonymInstances #-}
 
 {-# OPTIONS_GHC -Wno-orphans #-}
 
@@ -18,7 +20,7 @@
 module Data.Tuple.Homotuple.OneTuple () where
 
 import Data.Tuple.Homotuple (Homotuple, errorLengthMismatch)
-import Data.Tuple.OneTuple  (OneTuple (OneTuple))
+import Data.Tuple.OneTuple  (OneTuple, pattern OneTuple)
 import GHC.Exts             (IsList (Item, fromList, toList))
 
 type instance Homotuple 1 a = OneTuple a

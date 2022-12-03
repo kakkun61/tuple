@@ -1,7 +1,7 @@
 cabal-version: 2.2
 
 name:           single-tuple
-version:        0.1.2.0
+version:        0.1.2.1
 synopsis:       a class for single tuple implementations
 description:    a class for single tuple implementations
 category:       Data
@@ -24,7 +24,7 @@ source-repository head
 
 common common
   build-depends: base >=4.10 && <5,
-                 OneTuple >=0.2 && <0.3,
+                 OneTuple >=0.2 && <0.4,
                  Only >=0.1 && <0.2,
                  ghc-prim
   ghc-options:   -Wall

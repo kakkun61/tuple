@@ -20,7 +20,7 @@ module Data.Tuple.Single
   ) where
 
 import Data.Functor.Identity (Identity (Identity, runIdentity))
-import Data.Tuple.OneTuple   (OneTuple (OneTuple), only)
+import Data.Tuple.OneTuple   (OneTuple, pattern OneTuple, only)
 import Data.Tuple.Only       (Only (Only, fromOnly))
 
 #if MIN_VERSION_ghc_prim(0,7,0)
@@ -49,11 +49,13 @@ instance Single Only where
 
 {-# COMPLETE Single :: Only #-}
 
+#if !MIN_VERSION_OneTuple(0,3,0)
 instance Single OneTuple where
   wrap = OneTuple
   unwrap = only
 
 {-# COMPLETE Single :: OneTuple #-}
+#endif
 
 #if MIN_VERSION_ghc_prim(0,7,0)
 instance Single Solo where
