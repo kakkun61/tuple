@@ -1,4 +1,5 @@
 {-# LANGUAGE AllowAmbiguousTypes    #-}
+{-# LANGUAGE CPP                    #-}
 {-# LANGUAGE DataKinds              #-}
 {-# LANGUAGE DefaultSignatures      #-}
 {-# LANGUAGE FlexibleContexts       #-}
@@ -79,10 +80,17 @@ import Prelude (Integral, error, fromInteger, id, ($))
 import Data.Functor.Identity (Identity)
 import Data.Kind             (Type)
 import Data.Proxy            (Proxy (Proxy))
-import Data.Tuple.OneTuple   (OneTuple)
 import Data.Tuple.Only       (Only)
 import Data.Tuple.Single     (Single (unwrap, wrap))
 import GHC.TypeLits          (ErrorMessage (Text), KnownNat, Nat, TypeError, natVal)
+
+#if MIN_VERSION_OneTuple(0,3,0)
+#if !MIN_VERSION_base(4,15,0)
+import Data.Tuple.Solo   (Solo)
+#endif
+#else
+import Data.Tuple.OneTuple (OneTuple)
+#endif
 
 -- Basic functions
 
@@ -253,11 +261,27 @@ instance Single c => HasUncons' (c a) a () where
   uncons' t = (unwrap t, ())
 
 {-# COMPLETE Cons' :: Identity #-}
-{-# COMPLETE Cons' :: OneTuple #-}
 {-# COMPLETE Cons' :: Only #-}
+
+#if MIN_VERSION_OneTuple(0,3,0)
+#if !MIN_VERSION_base(4,15,0)
+{-# COMPLETE Cons' :: Solo #-}
+#endif
+#else
+{-# COMPLETE Cons' :: OneTuple #-}
+#endif
+
 {-# COMPLETE Cons :: Identity #-}
-{-# COMPLETE Cons :: OneTuple #-}
 {-# COMPLETE Cons :: Only #-}
+
+#if MIN_VERSION_OneTuple(0,3,0)
+#if !MIN_VERSION_base(4,15,0)
+{-# COMPLETE Cons :: Solo #-}
+#endif
+#else
+{-# COMPLETE Cons :: OneTuple #-}
+#endif
+
 
 instance {-# OVERLAPPABLE #-} Single c => HasLength (c a) where
   length _ = 1

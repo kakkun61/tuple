@@ -20,10 +20,19 @@ module Data.Tuple.Single
   ) where
 
 import Data.Functor.Identity (Identity (Identity, runIdentity))
-import Data.Tuple.OneTuple   (OneTuple (OneTuple), only)
 import Data.Tuple.Only       (Only (Only, fromOnly))
 
-#if MIN_VERSION_ghc_prim(0,7,0)
+#if MIN_VERSION_OneTuple(0,3,0)
+#if !MIN_VERSION_base(4,15,0)
+import qualified Data.Tuple.Solo as OneTuple
+#endif
+#else
+import Data.Tuple.OneTuple (OneTuple (OneTuple), only)
+#endif
+
+#if MIN_VERSION_ghc_prim(0,10,0)
+import GHC.Tuple (Solo (MkSolo))
+#elif MIN_VERSION_ghc_prim(0,7,0)
 import GHC.Tuple (Solo (Solo))
 #else
 import GHC.Tuple (Unit (Unit))
@@ -49,13 +58,29 @@ instance Single Only where
 
 {-# COMPLETE Single :: Only #-}
 
+#if MIN_VERSION_OneTuple(0,3,0)
+#if !MIN_VERSION_base(4,15,0)
+instance Single OneTuple.Solo where
+  wrap = OneTuple.Solo
+  unwrap = OneTuple.getSolo
+
+{-# COMPLETE Single :: OneTuple.Solo #-}
+#endif
+#else
 instance Single OneTuple where
   wrap = OneTuple
   unwrap = only
 
 {-# COMPLETE Single :: OneTuple #-}
+#endif
 
-#if MIN_VERSION_ghc_prim(0,7,0)
+#if MIN_VERSION_ghc_prim(0,10,0)
+instance Single Solo where
+  wrap = MkSolo
+  unwrap (MkSolo a) = a
+
+{-# COMPLETE Single :: Solo #-}
+#elif MIN_VERSION_ghc_prim(0,7,0)
 instance Single Solo where
   wrap = Solo
   unwrap (Solo a) = a

@@ -7,7 +7,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        ghc: [latest, '9.0', '8.10', '8.8', '8.6']
+        ghc: ['9.0.2', '8.10.7', '8.8.4', '8.6.5']
         experimental: [false]
         package: [single-tuple, list-tuple, homotuple]
         do: [build, test]
@@ -30,19 +30,16 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: haskell/actions/setup@v1
+        id: setup-haskell
         with:
           ghc-version: ${{ matrix.ghc }}
-      - uses: actions/cache@v1
+      - run: cp cabal.project.${{ matrix.ghc }}.freeze cabal.project.freeze
+      - uses: actions/cache@v2
         with:
-          path: ~/.cabal/packages
-          key: packages-${{ matrix.ghc }}
-      - uses: actions/cache@v1
-        with:
-          path: ~/.cabal/store
-          key: store-${{ matrix.ghc }}
-      - uses: actions/cache@v1
-        with:
-          path: dist-newstyle
-          key: dist-newstyle-${{ matrix.ghc }}
+          path: |
+            ${{ steps.setup-haskell.outputs.cabal-store }}
+            ./dist-newstyle
+          key: cabal-${{ matrix.package }}-${{ matrix.ghc }}-${{ matrix.do }}-${{ hashFiles('/cabal.project.freeze') }}
+          restore-keys: cabal-${{ matrix.package }}-${{ matrix.ghc }}-${{ matrix.do }}-
       - run: cabal v2-build --only-dependencies ${{ matrix.package }}
       - run: cabal v2-${{ matrix.do }} ${{ matrix.package }}
