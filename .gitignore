@@ -7,4 +7,5 @@ TAGS
 
 /stack.yaml
 
-.vscode/
+cabal.project.local
+cabal.project.freeze
