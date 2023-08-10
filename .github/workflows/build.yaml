@@ -28,13 +28,13 @@ jobs:
     continue-on-error: ${{ matrix.experimental }}
     name: ${{ matrix.do }} ${{ matrix.package }} with GHC ${{ matrix.ghc }}
     steps:
-      - uses: actions/checkout@v2
-      - uses: haskell/actions/setup@v1
+      - uses: actions/checkout@v3
+      - uses: haskell/actions/setup@v2
         id: setup-haskell
         with:
           ghc-version: ${{ matrix.ghc }}
       - run: cp cabal.project.${{ matrix.ghc }}.freeze cabal.project.freeze
-      - uses: actions/cache@v2
+      - uses: actions/cache@v3
         with:
           path: |
             ${{ steps.setup-haskell.outputs.cabal-store }}
