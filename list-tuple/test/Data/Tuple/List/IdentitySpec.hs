@@ -62,7 +62,7 @@ spec = do
           (Cons a () :: Identity ()) `shouldBe` Identity a
 
         it "deconstruct" $ do
-          case Identity () of { Cons () () -> True ; _ -> False } `shouldBe` True
+          case Identity () of { Cons () () -> True } `shouldBe` True
 
       it "reverse" $ do
         let a = ()

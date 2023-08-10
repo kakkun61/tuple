@@ -3,7 +3,7 @@
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE TypeFamilies #-}
 
-{-# OPTIONS_GHC -fdefer-type-errors -Wno-deferred-type-errors -Wno-redundant-constraints #-}
+{-# OPTIONS_GHC -fdefer-type-errors -Wno-deferred-type-errors -Wno-redundant-constraints -Wno-incomplete-patterns #-}
 
 module Data.Tuple.ListSpec (spec) where
 
@@ -64,7 +64,7 @@ spec = do
         length () `shouldBe` (0 :: Int)
 
       it "Null" $ do
-        case () of { Null -> True ; _ -> False } `shouldBe` True
+        case () of { Null -> True } `shouldBe` True
 
       describe "Cons'" $ do
         it "construct" $ do
@@ -143,7 +143,7 @@ spec = do
        length (Proxy :: Proxy Int) `shouldBe` (0 :: Int)
 
       it "Null" $ do
-        case (Proxy :: Proxy Int) of { Null -> True ; _ -> False } `shouldBe` True
+        case (Proxy :: Proxy Int) of { Null -> True } `shouldBe` True
 
       describe "Cons'" $ do
         it "construct" $ do
@@ -463,7 +463,7 @@ spec = do
           a = 0
           b = 1
           c = 2
-        case (a, b, c) of { Cons' a' (b', c') -> (a, b, c) == (a', b', c')  ; _ -> False } `shouldBe` True
+        case (a, b, c) of { Cons' a' (b', c') -> (a, b, c) == (a', b', c') } `shouldBe` True
 
     describe "Cons" $ do
       it "construct" $ do
@@ -480,7 +480,7 @@ spec = do
           a = 0
           b = 1
           c = 2
-        case (a, b, c) of { Cons a' (b', c') -> (a, b, c) == (a', b', c')  ; _ -> False } `shouldBe` True
+        case (a, b, c) of { Cons a' (b', c') -> (a, b, c) == (a', b', c') } `shouldBe` True
 
     it "reverse'" $ do
       let

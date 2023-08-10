@@ -34,7 +34,6 @@ common common
                     -Wmonomorphism-restriction
                     -Wmissing-exported-signatures
                     -Wmissing-home-modules
-                    -Wmissing-import-lists
                     -Widentities
                     -Wredundant-constraints
                     -Wno-name-shadowing
@@ -61,8 +60,7 @@ library
   build-depends:   OneTuple >=0.2 && <0.5,
                    Only >=0.1 && <0.2,
                    single-tuple >=0.1 && <0.2
-  if impl(ghc >= 8.4.0)
-    ghc-options:   -Wmissing-export-lists
+  ghc-options:     -Wmissing-import-lists
 
 test-suite test
   import:             common
