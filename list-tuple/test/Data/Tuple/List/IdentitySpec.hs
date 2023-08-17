@@ -3,7 +3,10 @@
 {-# LANGUAGE TypeApplications#-}
 {-# LANGUAGE TypeFamilies #-}
 
-{-# OPTIONS_GHC -fdefer-type-errors -Wno-deferred-type-errors -Wno-redundant-constraints #-}
+{-# OPTIONS_GHC -fdefer-type-errors #-}
+{-# OPTIONS_GHC -Wno-deferred-type-errors #-}
+{-# OPTIONS_GHC -Wno-redundant-constraints #-}
+{-# OPTIONS_GHC -Wno-incomplete-patterns #-}
 
 module Data.Tuple.List.IdentitySpec (spec) where
 
