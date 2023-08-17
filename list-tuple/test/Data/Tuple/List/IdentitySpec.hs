@@ -54,7 +54,7 @@ spec = do
         length (Identity ()) `shouldBe` (1 :: Int)
 
       it "Null" $ do
-        shouldNotTypecheck $ case Identity () of { Null -> False ; _ -> False }
+        shouldNotTypecheck $ case Identity () of { Null -> False }
 
       describe "Cons'" $ do
         it "construct" $ do
