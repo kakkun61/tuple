@@ -14,7 +14,7 @@ license:        Apache-2.0
 license-file:   LICENSE
 build-type:     Simple
 
-extra-source-files:
+extra-doc-files:
     README.md
     ChangeLog.md
 
@@ -26,7 +26,7 @@ common common
   build-depends:    base >=4.10 && <5,
                     OneTuple >=0.2 && <0.5,
                     Only >=0.1 && <0.2,
-                    ghc-prim
+                    ghc-prim >= 0.8.0 && < 0.9
   ghc-options:      -Wall
                     -Wcompat
                     -Wincomplete-uni-patterns
@@ -60,5 +60,5 @@ test-suite test
                       -with-rtsopts=-N
                       -Wno-missing-import-lists
   build-depends:      single-tuple,
-                      hspec
+                      hspec >=2.11 && <2.12
   build-tool-depends: hspec-discover:hspec-discover

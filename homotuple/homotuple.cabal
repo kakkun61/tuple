@@ -14,9 +14,11 @@ license:        Apache-2.0
 license-file:   LICENSE
 build-type:     Custom
 
-extra-source-files:
+extra-doc-files:
     README.md
     ChangeLog.md
+
+extra-source-files:
     template/Homotuple.hs
     template/HomotupleItem.hs
 
@@ -26,9 +28,9 @@ source-repository head
 
 custom-setup
   setup-depends:
-      Cabal,
-      base,
-      directory
+      Cabal >=3 && <4,
+      base >=4.10 && <5,
+      directory >=1.3 && <1.4
 
 library
   exposed-modules:      Data.Tuple.Homotuple
