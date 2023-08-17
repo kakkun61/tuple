@@ -1,5 +1,11 @@
 # Changelog for homotuple
 
+## 0.2.1.0
+
+2023.08.17
+
+Support [OneTuple](https://hackage.haskell.org/package/OneTuple) 0.3, 0.4.
+
 ## 0.2.0.0
 
 2021.03.19
