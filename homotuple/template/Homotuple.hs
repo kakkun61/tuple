@@ -1,4 +1,5 @@
 {-# LANGUAGE ConstraintKinds        #-}
+{-# LANGUAGE CPP                    #-}
 {-# LANGUAGE DataKinds              #-}
 {-# LANGUAGE FlexibleContexts       #-}
 {-# LANGUAGE FlexibleInstances      #-}
@@ -42,6 +43,10 @@ module Data.Tuple.Homotuple
   ) where
 
 import Prelude (Num (fromInteger), error, ($), (.))
+
+#if __GLASGOW_HASKELL__ >= 906
+import Prelude (type (~))
+#endif
 
 import qualified Control.Applicative as A
 import qualified Control.Monad       as M

@@ -81,7 +81,6 @@ preProcessListTuple _ _ = do
           | Just rest <- stripPrefix "<tuple-tail>" t = [tupleTail ++ Prelude.head (go rest)]
           | Just rest <- stripPrefix "<tuple-init>" t = [tupleInit ++ Prelude.head (go rest)]
           | Just rest <- stripPrefix "<tuple-last>" t = [tupleLast ++ Prelude.head (go rest)]
-          | Just rest <- stripPrefix "<cons>" t = [cons ++ Prelude.head (go rest)]
           | Just rest <- stripPrefix "<reverse>" t = [reverse ++ Prelude.head (go rest)]
           | Just rest <- stripPrefix "<" t = error $ "unknown tag: " ++ takeWhile (/= '>') rest
           | Just _ <- stripPrefix "---- has-at" t

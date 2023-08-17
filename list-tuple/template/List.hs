@@ -77,6 +77,10 @@ module Data.Tuple.List
 
 import Prelude (Integral, error, fromInteger, id, ($))
 
+#if __GLASGOW_HASKELL__ >= 906
+import Prelude (type (~))
+#endif
+
 import Data.Functor.Identity (Identity)
 import Data.Kind             (Type)
 import Data.Proxy            (Proxy (Proxy))
