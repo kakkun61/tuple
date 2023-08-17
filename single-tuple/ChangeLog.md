@@ -1,5 +1,11 @@
 # Changelog for single-tuple
 
+## 0.1.3.0
+
+2023.08.17
+
+Support [OneTuple](https://hackage.haskell.org/package/OneTuple) 0.3, 0.4.
+
 ## 0.1.2.0
 
 2021.05.21
