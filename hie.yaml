@@ -1,16 +1,36 @@
 cradle:
-  cabal:
-    - path: "homotuple/src"
-      component: "lib:homotuple"
+  multi:
+    - path: "homotuple/Setup.hs"
+      config:
+        cradle:
+          direct:
+            arguments:
+              - "-package base"
+              - "-package Cabal"
+              - "-package directory"
+    - path: "list-tuple/Setup.hs"
+      config:
+        cradle:
+          direct:
+            arguments:
+              - "-package base"
+              - "-package Cabal"
+              - "-package directory"
+    - path: .
+      config:
+        cradle:
+          cabal:
+            - path: "homotuple/src"
+              component: "lib:homotuple"
 
-    - path: "list-tuple/src"
-      component: "lib:list-tuple"
+            - path: "list-tuple/src"
+              component: "lib:list-tuple"
 
-    - path: "list-tuple/test"
-      component: "list-tuple:test:test"
+            - path: "list-tuple/test"
+              component: "list-tuple:test:test"
 
-    - path: "single-tuple/src"
-      component: "lib:single-tuple"
+            - path: "single-tuple/src"
+              component: "lib:single-tuple"
 
-    - path: "single-tuple/test"
-      component: "single-tuple:test:test"
+            - path: "single-tuple/test"
+              component: "single-tuple:test:test"
