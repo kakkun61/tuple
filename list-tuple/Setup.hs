@@ -31,7 +31,7 @@ preProcessListTuple _ _ = do
       tempDir <- (++ "/list-tuple") <$> getTemporaryDirectory
       createDirectoryIfMissing True tempDir
       (tempPath, temp) <- openTempFile tempDir file
-      putStrLn $ "temporaly file: " ++ tempPath
+      putStrLn $ "temporary file: " ++ tempPath
       hSetNewlineMode template noNewlineTranslation
       hSetNewlineMode temp noNewlineTranslation
       hSetNewlineMode stdin noNewlineTranslation
