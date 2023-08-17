@@ -1,7 +1,7 @@
 {-# LANGUAGE DataKinds           #-}
 {-# LANGUAGE ScopedTypeVariables #-}
-{-# LANGUAGE TypeApplications #-}
-{-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE TypeApplications    #-}
+{-# LANGUAGE TypeFamilies        #-}
 
 {-# OPTIONS_GHC -fdefer-type-errors -Wno-deferred-type-errors -Wno-redundant-constraints -Wno-incomplete-patterns #-}
 
@@ -12,10 +12,10 @@ import Data.Tuple.List
 import Test.Hspec
 import Test.ShouldNotTypecheck
 
-import Prelude hiding (head, tail, init, last, length, reverse, (!!))
+import Prelude hiding (head, init, last, length, reverse, tail, (!!))
 
-import           Data.Proxy
-import           Data.Tuple.Single
+import Data.Proxy
+import Data.Tuple.Single
 
 spec :: Spec
 spec = do

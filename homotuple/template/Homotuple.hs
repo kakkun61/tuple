@@ -52,7 +52,7 @@ import qualified Data.Semigroup      as S
 import           Data.Tuple.Single   (Single (wrap))
 import           GHC.Exts            (IsList (Item, fromList, toList))
 import           GHC.Stack           (HasCallStack)
-import           GHC.TypeLits        (type (*), type (+), KnownNat, Nat, natVal)
+import           GHC.TypeLits        (KnownNat, Nat, natVal, type (*), type (+))
 
 type family Homotuple (n :: Nat) (a :: Type) = (t :: Type) | t -> n
 

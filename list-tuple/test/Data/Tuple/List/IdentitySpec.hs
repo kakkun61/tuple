@@ -1,7 +1,7 @@
 {-# LANGUAGE DataKinds           #-}
 {-# LANGUAGE ScopedTypeVariables #-}
-{-# LANGUAGE TypeApplications#-}
-{-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE TypeApplications    #-}
+{-# LANGUAGE TypeFamilies        #-}
 
 {-# OPTIONS_GHC -fdefer-type-errors #-}
 {-# OPTIONS_GHC -Wno-deferred-type-errors #-}
@@ -15,11 +15,11 @@ import Data.Tuple.List.Identity ()
 
 import Test.Hspec
 
-import Prelude hiding (head, tail, init, last, length, reverse, (!!))
+import Prelude hiding (head, init, last, length, reverse, tail, (!!))
 
-import           Data.Functor.Identity
-import           Data.Proxy
-import           Test.ShouldNotTypecheck
+import Data.Functor.Identity
+import Data.Proxy
+import Test.ShouldNotTypecheck
 
 spec :: Spec
 spec = do
