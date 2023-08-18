@@ -77,7 +77,7 @@ module Data.Tuple.List
 
 import Prelude (Integral, error, fromInteger, id, ($))
 
-#if __GLASGOW_HASKELL__ >= 906
+#if __GLASGOW_HASKELL__ >= 904
 import Prelude (type (~))
 #endif
 

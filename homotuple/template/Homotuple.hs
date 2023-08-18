@@ -44,7 +44,7 @@ module Data.Tuple.Homotuple
 
 import Prelude (Num (fromInteger), error, ($), (.))
 
-#if __GLASGOW_HASKELL__ >= 906
+#if __GLASGOW_HASKELL__ >= 904
 import Prelude (type (~))
 #endif
 
