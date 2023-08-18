@@ -1,9 +1,9 @@
 cabal-version: 2.2
 
 name:           list-tuple
-version:        0.1.4.0
+version:        0.1.4.1
 synopsis:       List-like operations for tuples
-description:    List-like operations for tuples
+description:    List-like operations for tuples.
 category:       Data
 homepage:       https://github.com/kakkun61/tuple
 bug-reports:    https://github.com/kakkun61/tuple/issues

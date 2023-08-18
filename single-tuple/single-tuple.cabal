@@ -3,7 +3,7 @@ cabal-version: 2.2
 name:           single-tuple
 version:        0.1.3.0
 synopsis:       a class for single tuple implementations
-description:    a class for single tuple implementations
+description:    A class for single tuple implementations.
 category:       Data
 homepage:       https://github.com/kakkun61/tuple
 bug-reports:    https://github.com/kakkun61/tuple/issues

@@ -1,9 +1,9 @@
 cabal-version: 2.2
 
 name:           homotuple
-version:        0.2.1.0
+version:        0.2.1.1
 synopsis:       Homotuple, all whose elements are the same type
-description:    Homotuple, all whose elements are the same type
+description:    Homotuple, all whose elements are the same type.
 category:       Data
 homepage:       https://github.com/kakkun61/tuple
 bug-reports:    https://github.com/kakkun61/tuple/issues
