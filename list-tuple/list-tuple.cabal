@@ -2,6 +2,7 @@ cabal-version: 2.2
 
 name:           list-tuple
 version:        0.1.4.1
+x-revision:     1
 synopsis:       List-like operations for tuples
 description:    List-like operations for tuples.
 category:       Data
