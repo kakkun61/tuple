@@ -1,36 +1,45 @@
-import           Prelude hiding (head, init, last, reverse, tail)
+import           Prelude          (Bool (True), IO, Int, Maybe (Just),
+                                   show, String, Word, concatMap, error,
+                                   fromIntegral, lines, otherwise, pure,
+                                   putStrLn, read, readFile, span, take,
+                                   takeWhile, ($), (++), (.), (/=), (<$>), (>=), FilePath)
 import qualified Prelude
 
-import Data.Char                          (isDigit)
-import Data.Foldable                      (for_)
-import Data.List                          (intercalate, intersperse, isPrefixOf, replicate, stripPrefix)
-import Distribution.Simple                (Args, UserHooks (preBuild), defaultMainWithHooks, simpleUserHooks)
-import Distribution.Simple.Setup          (BuildFlags)
-import Distribution.Types.HookedBuildInfo (HookedBuildInfo, emptyHookedBuildInfo)
-import System.Directory                   (copyFile, createDirectoryIfMissing, getTemporaryDirectory, removeFile)
-import System.IO                          (Handle, IOMode (ReadMode), hClose, hGetLine, hIsEOF, hPutStrLn,
-                                           hSetNewlineMode, noNewlineTranslation, openTempFile, stdin, withFile)
+import           Data.Char        (isDigit)
+import           Data.Foldable    (for_)
+import           Data.List        (intercalate, replicate, stripPrefix)
+import           System.Directory (copyFile, createDirectoryIfMissing,
+                                   getTemporaryDirectory, removeFile)
+import           System.IO        (Handle, IOMode (ReadMode), hClose, hGetLine,
+                                   hIsEOF, hPutStrLn, hSetNewlineMode,
+                                   noNewlineTranslation, openTempFile, stdin,
+                                   withFile, stderr)
+import System.Environment (getArgs)
+import System.Exit (exitFailure)
 
 main :: IO ()
-main =
-  defaultMainWithHooks
-    simpleUserHooks
-      { preBuild = preProcessListTuple }
+main = do
+  args <- getArgs
+  case args of
+    [wd] -> app wd 
+    _ -> do
+      hPutStrLn stderr "Usage: homotuple-template DIR"
+      exitFailure
 
-preProcessListTuple :: Args -> BuildFlags -> IO HookedBuildInfo
-preProcessListTuple _ _ = do
+app :: FilePath -> IO ()
+app wd = do      
   let
-    dir = "src/Data/Tuple"
+    dir = wd ++ "/" ++ "src/Data/Tuple"
     file = "Homotuple.hs"
     srcPath = dir ++ "/" ++ file
-    templatePath = "template/Homotuple.hs"
-    templateItemPath = "template/HomotupleItem.hs"
+    templatePath = wd ++ "/" ++ "template/Homotuple.hs"
+    templateItemPath = wd ++ "/" ++ "template/HomotupleItem.hs"
   tempPath <-
     withFile templatePath ReadMode $ \template -> do
       tempDir <- (++ "/homotuple") <$> getTemporaryDirectory
       createDirectoryIfMissing True tempDir
       (tempPath, temp) <- openTempFile tempDir file
-      putStrLn $ "temporaly file: " ++ tempPath
+      putStrLn $ "temporary file: " ++ tempPath
       hSetNewlineMode template noNewlineTranslation
       hSetNewlineMode temp noNewlineTranslation
       hSetNewlineMode stdin noNewlineTranslation
@@ -38,9 +47,9 @@ preProcessListTuple _ _ = do
       loop template temp templateItem
       hClose temp
       pure tempPath
+  createDirectoryIfMissing True dir
   copyFile tempPath srcPath
   removeFile tempPath
-  pure emptyHookedBuildInfo
   where
     loop :: Handle -> Handle -> [String] -> IO ()
     loop template temp templateItem =
@@ -58,7 +67,8 @@ preProcessListTuple _ _ = do
     preprocess :: String -> [String] -> [String]
     preprocess line templateItem
       | Just rest <- stripPrefix "---- embed " line
-      , let n = read $ takeWhile isDigit rest
+      , let n :: Word
+            n = read $ takeWhile isDigit rest
       = embed n templateItem
       | otherwise = [line]
 
@@ -75,6 +85,7 @@ preProcessListTuple _ _ = do
           | Just rest <- stripPrefix "<length>" t = [length ++ Prelude.head (go rest)]
           | Just rest <- stripPrefix "<" t = error $ "unknown tag: " ++ takeWhile (/= '>') rest
           | (s, rest) <- span (/= '<') t = [s ++ Prelude.head (go rest)]
+        n :: Int
         n = fromIntegral l
         homotuple = paren $ replicate n "a"
         tuple = paren $ take n i012
@@ -82,4 +93,4 @@ preProcessListTuple _ _ = do
         length = show l
         paren xs = "(" ++ intercalate ", " xs ++ ")"
         bracket xs = "[" ++ intercalate ", " xs ++ "]"
-        i012 = ('i':) . show <$> [0 ..]
+        i012 = ('i':) . show <$> [0 :: Word ..]

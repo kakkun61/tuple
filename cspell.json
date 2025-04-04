@@ -1,0 +1,38 @@
+{
+  "version": "0.2",
+  "language": "en",
+  "words": [
+    "autogen",
+    "deepseq",
+    "exitcode",
+    "homotuple",
+    "homotuples",
+    "hspec",
+    "installdir",
+    "kazuki",
+    "monoid",
+    "nixos",
+    "nixpkgs",
+    "numtide",
+    "okamoto",
+    "overlappable",
+    "pkgs",
+    "rtsopts",
+    "semigroup",
+    "semigroupe",
+    "uncons",
+    "unders",
+    "unticked"
+  ],
+  "flagWords": [],
+  "ignoreRegExpList": [
+    "/-W[a-z]+/"
+  ],
+  "ignorePaths": [
+    ".git",
+    ".gitignore",
+    ".gitmodules",
+    ".vscode",
+    "cspell.json"
+  ]
+}

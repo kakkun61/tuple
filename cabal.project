@@ -1,3 +1,5 @@
 packages: single-tuple,
           list-tuple,
-          homotuple
+          list-tuple/dev,
+          homotuple,
+          homotuple/dev

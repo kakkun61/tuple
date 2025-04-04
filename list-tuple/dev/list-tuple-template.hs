@@ -1,31 +1,40 @@
-import           Prelude hiding (head, init, last, reverse, tail)
+import           Prelude          (Bool (True), IO, Int, Maybe (Just),
+                                   show, String, Word, concatMap, error,
+                                   fromIntegral, lines, otherwise, pure,
+                                   putStrLn, read, readFile, span, take,
+                                   takeWhile, ($), (++), (.), (/=), (<$>), (>=), FilePath,(-),(!!),(<*>),repeat,(&&),concat)
 import qualified Prelude
 
-import Data.Char                          (isDigit)
-import Data.Foldable                      (for_)
-import Data.List                          (intercalate, intersperse, isPrefixOf, replicate, stripPrefix)
-import Distribution.Simple                (Args, UserHooks (preBuild), defaultMainWithHooks, simpleUserHooks)
-import Distribution.Simple.Setup          (BuildFlags)
-import Distribution.Types.HookedBuildInfo (HookedBuildInfo, emptyHookedBuildInfo)
-import System.Directory                   (copyFile, createDirectoryIfMissing, getTemporaryDirectory, removeFile)
-import System.IO                          (Handle, IOMode (ReadMode), hClose, hGetLine, hIsEOF, hPutStrLn,
-                                           hSetNewlineMode, noNewlineTranslation, openTempFile, stdin, withFile)
+import           Data.Char        (isDigit)
+import           Data.Foldable    (for_)
+import           Data.List        (intercalate, replicate, stripPrefix,intersperse)
+import           System.Directory (copyFile, createDirectoryIfMissing,
+                                   getTemporaryDirectory, removeFile)
+import           System.IO        (Handle, IOMode (ReadMode), hClose, hGetLine,
+                                   hIsEOF, hPutStrLn, hSetNewlineMode,
+                                   noNewlineTranslation, openTempFile, stdin,
+                                   withFile, stderr)
+import System.Environment (getArgs)
+import System.Exit (exitFailure)
 
 main :: IO ()
-main =
-  defaultMainWithHooks
-    simpleUserHooks
-      { preBuild = preProcessListTuple }
+main = do
+  args <- getArgs
+  case args of
+    [wd] -> app wd 
+    _ -> do
+      hPutStrLn stderr "Usage: list-tuple-template DIR"
+      exitFailure
 
-preProcessListTuple :: Args -> BuildFlags -> IO HookedBuildInfo
-preProcessListTuple _ _ = do
+app :: FilePath -> IO ()
+app wd = do      
   let
-    dir = "src/Data/Tuple"
+    dir = wd ++ "/" ++ "src/Data/Tuple"
     file = "List.hs"
     srcPath = dir ++ "/" ++ file
-    templatePath = "template/List.hs"
-    templateItemPath = "template/ListItem.hs"
-    templateAtPath = "template/ListAt.hs"
+    templatePath = wd ++ "/" ++ "template/List.hs"
+    templateItemPath = wd ++ "/" ++ "template/ListItem.hs"
+    templateAtPath = wd ++ "/" ++ "template/ListAt.hs"
   tempPath <-
     withFile templatePath ReadMode $ \template -> do
       tempDir <- (++ "/list-tuple") <$> getTemporaryDirectory
@@ -40,9 +49,9 @@ preProcessListTuple _ _ = do
       loop template temp templateItem templateAt
       hClose temp
       pure tempPath
+  createDirectoryIfMissing True dir
   copyFile tempPath srcPath
   removeFile tempPath
-  pure emptyHookedBuildInfo
   where
     loop :: Handle -> Handle -> [String] -> [String] -> IO ()
     loop template temp templateItem templateAt =
@@ -60,7 +69,8 @@ preProcessListTuple _ _ = do
     preprocess :: String -> [String] -> [String] -> [String]
     preprocess line templateItem templateAt
       | Just rest <- stripPrefix "---- embed " line
-      , let n = read $ takeWhile isDigit rest
+      , let n :: Word
+            n = read $ takeWhile isDigit rest
       = embed n templateItem templateAt
       | otherwise = [line]
 
@@ -87,6 +97,7 @@ preProcessListTuple _ _ = do
           = concatMap go $ concat $ intersperse [""] $ embedAt <$> [0 .. l - 1]
           | Just rest <- stripPrefix "-" t = ["-" ++ Prelude.head (go rest)]
           | (s, rest) <- span ((&&) <$> (/= '<') <*> (/= '-')) t = [s ++ Prelude.head (go rest)]
+        n :: Int
         n = fromIntegral l
         m = n - 1
         tuple = paren $ take n i012
@@ -100,7 +111,7 @@ preProcessListTuple _ _ = do
         tupleLast = paren $ Prelude.reverse $ take n $ last : unders
         cons = "(" ++ replicate m ',' ++ ")"
         paren xs = "(" ++ intercalate ", " xs ++ ")"
-        i012 = ('i':) . show <$> [0 ..]
+        i012 = ('i':) . show <$> [0 :: Word ..]
         unders = repeat "_"
         zy = Prelude.reverse (take m i012)
         zyx = Prelude.reverse (take n i012)
@@ -117,6 +128,7 @@ preProcessListTuple _ _ = do
               | Just rest <- stripPrefix "<tuple-at>" t = tupleAt ++ go rest
               | Just rest <- stripPrefix "<" t = "<" ++ go rest
               | (s, rest) <- span (/= '<') t = s ++ go rest
+            at' :: Int
             at' = fromIntegral at
             item = i012 !! at'
             tupleAt = paren $ take at' unders ++ [item] ++ take (n - at' - 1) unders
