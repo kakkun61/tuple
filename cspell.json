@@ -11,15 +11,21 @@
     "installdir",
     "kazuki",
     "monoid",
+    "newstyle",
     "nixos",
     "nixpkgs",
     "numtide",
     "okamoto",
     "overlappable",
     "pkgs",
+    "psake",
+    "psakefile",
     "rtsopts",
     "semigroup",
     "semigroupe",
+    "subpackages",
+    "subpsake",
+    "subpsakefile",
     "uncons",
     "unders",
     "unticked"
@@ -33,6 +39,7 @@
     ".gitignore",
     ".gitmodules",
     ".vscode",
-    "cspell.json"
+    "cspell.json",
+    "*.freeze"
   ]
 }

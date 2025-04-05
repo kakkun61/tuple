@@ -3,43 +3,64 @@ name: build
 on: [push, pull_request]
 
 jobs:
+  run-template:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: haskell-actions/setup@v2
+        id: setup-haskell
+        with:
+          ghc-version: '9.10'
+      - run: make run-template
+      - run: |
+          git ls-files --modified | tee modified-files.txt
+          test -z "$(cat modified-files.txt)"
+
   build:
+    needs: run-template
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        ghc: ['9.6.2', '9.4.5', '9.2.8']
-        experimental: [false]
-        package: [single-tuple, list-tuple, homotuple]
-        do: [build, test]
-        exclude:
-          - package: single-tuple
-            do: build
-          - package: list-tuple
-            do: build
-          - package: homotuple
-            do: test
-        # include:
-        #   - package: single-tuple
-        #     do: test
-        #   - package: list-tuple
-        #     do: test
-        #   - package: homotuple
-        #     do: build
-    continue-on-error: ${{ matrix.experimental }}
-    name: ${{ matrix.do }} ${{ matrix.package }} with GHC ${{ matrix.ghc }}
+        ghc: ['9.4.8', '9.8.4', '9.10.1']
     steps:
       - uses: actions/checkout@v3
-      - uses: haskell/actions/setup@v2
+      - uses: haskell-actions/setup@v2
         id: setup-haskell
         with:
           ghc-version: ${{ matrix.ghc }}
-      - run: cp cabal.project.${{ matrix.ghc }}.freeze cabal.project.freeze
+      - run: |
+          cabal update
+          cabal v2-freeze
       - uses: actions/cache@v3
         with:
           path: |
             ${{ steps.setup-haskell.outputs.cabal-store }}
             ./dist-newstyle
-          key: cabal-${{ matrix.package }}-${{ matrix.ghc }}-${{ matrix.do }}-${{ hashFiles('/cabal.project.freeze') }}
-          restore-keys: cabal-${{ matrix.package }}-${{ matrix.ghc }}-${{ matrix.do }}-
-      - run: cabal v2-build --only-dependencies ${{ matrix.package }}
-      - run: cabal v2-${{ matrix.do }} ${{ matrix.package }}
+          key: cabal-${{ matrix.ghc }}-${{ hashFiles('/cabal.project.freeze') }}
+          restore-keys: cabal-${{ matrix.ghc }}-
+      - run: make build-only-dependencies
+      - run: make
+
+  test:
+    needs: build
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        ghc: ['9.4.8', '9.8.4', '9.10.1']
+    steps:
+      - uses: actions/checkout@v3
+      - uses: haskell-actions/setup@v2
+        id: setup-haskell
+        with:
+          ghc-version: ${{ matrix.ghc }}
+      - run: |
+          cabal update
+          cabal v2-freeze
+      - uses: actions/cache@v3
+        with:
+          path: |
+            ${{ steps.setup-haskell.outputs.cabal-store }}
+            ./dist-newstyle
+          key: cabal-${{ matrix.ghc }}-${{ hashFiles('/cabal.project.freeze') }}
+          restore-keys: cabal-${{ matrix.ghc }}-
+      - run: make test
